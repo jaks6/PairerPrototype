@@ -7,21 +7,34 @@
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="15" />
-
+    
+	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
+        <service android:name="ee.ut.cs.mc.and.simplerecorder.RawRecording" />
+        
         <activity
             android:name="ee.ut.cs.mc.and.pairerprototype.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        
+        <activity
+            android:name="ee.ut.cs.mc.and.simplerecorder.RecorderActivity"
+            android:label="@string/app_name" >
+        </activity>
+        
     </application>
-
 </manifest>
