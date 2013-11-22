@@ -8,6 +8,8 @@
     
     <!-- Main Activity UI strings -->
     <string name="openRecorderButton">Open Recorder Activity</string>
+    <string name="startBtServer">Start \n Bluetooth Server</string>
+    <string name="startBtClient">Start \n Bluetooth Client</string>
     
     
     <!-- Recorder related string -->

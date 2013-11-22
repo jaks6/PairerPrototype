@@ -1,4 +1,4 @@
-package ee.ut.cs.mc.and.pairerprototype;
+package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
