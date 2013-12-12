@@ -2,20 +2,20 @@ package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import java.io.IOException;
 
-import android.R;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.widget.Toast;
+import android.os.Handler;
+import android.os.Message;
+import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 
 class AcceptThread extends Thread {
     private final BluetoothServerSocket mmServerSocket;
 	private BluetoothAdapter mBluetoothAdapter;
-	private Activity activity;
+	private Handler handler;
 	
-    public AcceptThread(BluetoothAdapter mBluetoothAdapter, Activity activity) {
-    	this.activity = activity;
+    public AcceptThread(BluetoothAdapter mBluetoothAdapter, Handler handler) {
+    	this.handler = handler;
         // Use a temporary object that is later assigned to mmServerSocket,
         // because mmServerSocket is final
     	this.mBluetoothAdapter = mBluetoothAdapter;
@@ -52,11 +52,15 @@ class AcceptThread extends Thread {
     private void manageConnectedSocket(BluetoothSocket socket){
     	//!TODO
     	//Create a new thread for the work
-    	activity.runOnUiThread(new Runnable() {
+    	Thread messageThread = (new Thread() {
     	    public void run() {
-    	        Toast.makeText(activity, "Server-side successfully accepted connection", Toast.LENGTH_SHORT).show();
+    	    	Message msg = handler.obtainMessage();
+    	        msg.what = MainActivity.TASK_COMPLETE;
+    	        msg.obj = "Serverside - client connection accepted";
+    	        handler.sendMessage(msg);
     	    }
     	});
+    	messageThread.start();
     }
  
     /** Will cancel the listening socket, and cause the thread to finish */

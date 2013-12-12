@@ -1,20 +1,17 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
-import java.io.IOException;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.Context;
+import android.os.Handler;
 
 public class Client {
 	private BluetoothAdapter adapter;
-	private Activity activity;
+	private Handler handler;
 	
-	public Client(Activity activity) {
+	public Client(Handler handler) {
 		this.adapter = BluetoothAdapter.getDefaultAdapter();
-		this.activity = activity;
+		this.handler = handler;
 	}
 
 
@@ -25,7 +22,7 @@ public class Client {
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
         
-		ConnectThread connectThread = new ConnectThread(server, activity);
+		ConnectThread connectThread = new ConnectThread(server, handler);
 		connectThread.start();
 	}
 }

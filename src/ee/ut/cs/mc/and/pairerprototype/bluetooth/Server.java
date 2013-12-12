@@ -2,18 +2,18 @@ package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import java.util.UUID;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.os.Handler;
 
 public class Server {
 	
 	BluetoothAdapter adapter;
-	private Activity activity;
+	private Handler handler;
 	
-	public void startListening (String name, UUID uuid, Activity activity){
-		this.activity = activity;
+	public void startListening (String name, UUID uuid, Handler handler){
+		this.handler = handler;
 		BluetoothAdapter mAdapter =  BluetoothAdapter.getDefaultAdapter();
-		AcceptThread acceptThread = new AcceptThread(mAdapter, activity);
+		AcceptThread acceptThread = new AcceptThread(mAdapter, handler);
 		acceptThread.start();
 	}
 }
