@@ -1,11 +1,13 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 
 class ConnectThread extends Thread {
@@ -47,19 +49,27 @@ class ConnectThread extends Thread {
         manageConnectedSocket(mmSocket);
     }
     
-    private void manageConnectedSocket(BluetoothSocket socket){
+    private void manageConnectedSocket(final BluetoothSocket socket){
     	//!TODO
     	//Create activity new thread for the work
-    	
     	Thread messageThread = (new Thread() {
     	    public void run() {
+    	    	
+    	    	Message msg_socket = handler.obtainMessage(MainActivity.SOCKET,socket);
+				handler.sendMessage(msg_socket);
+				
+    	    	//Display a toast:
     	    	Message msg = handler.obtainMessage();
     	        msg.what = MainActivity.TASK_COMPLETE;
+    	        msg.arg1 = 2;
     	        msg.obj = "Client succesfully connected";
     	        handler.sendMessage(msg);
+    	        
     	    }
     	});
     	messageThread.start();
+    	
+//    	new ConnectedThread(socket, handler).start();
     }
  
     /** Will cancel an in-progress connection, and close the socket */

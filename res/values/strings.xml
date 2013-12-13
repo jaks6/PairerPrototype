@@ -10,6 +10,10 @@
     <string name="openRecorderButton">Open Recorder Activity</string>
     <string name="startBtServer">Start \n Bluetooth Server</string>
     <string name="startBtClient">Start \n Bluetooth Client</string>
+    <string name="sendBtData">Send Data</string>
+    <string name="readBtData">Read Data</string>
+    
+    <string name="chatWindow">---------</string>
     
     
     <!-- Recorder related string -->

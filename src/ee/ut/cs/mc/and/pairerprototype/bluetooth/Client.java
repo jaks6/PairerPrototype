@@ -1,6 +1,5 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
@@ -17,7 +16,7 @@ public class Client {
 
 
 
-	public void initServerDevice(String address){
+	public void connectToServer(String address){
 		BluetoothDevice server = adapter.getRemoteDevice(address);
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
