@@ -14,7 +14,7 @@ public class ConnectedThread extends Thread {
     private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
-    static Handler handler;
+    private Handler handler;
  
     public ConnectedThread(BluetoothSocket socket, Handler handler) {
     	this.handler = handler;

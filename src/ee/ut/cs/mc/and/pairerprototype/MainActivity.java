@@ -1,10 +1,5 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -23,34 +18,40 @@ import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
-	
+
 	/*
 	 * Status codes
 	 */
+	public static final int DISPLAY_TOAST = 1;
 	public static final int BT_CONNECTION_ESTABLISHED = 4;
-	public static final int SOCKET = 11;
+	public static final int SOCKET_ESTABLISHED = 11;
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
 	public static final int MESSAGE_READ = 5;
-	public static final int MESSAGE_TEXTVIEW_READ = 6;
-	
-	
+//	public static final int MESSAGE_TEXTVIEW_READ = 6;
+
+
 	/* 
 	 * UI ELEMENTS
 	 */
 	Button clientButton;
 	Button serverButton;
 	EditText inputField;
-	
-	
+
+
 	BluetoothSocket socket = null;
+	Chat chatSession = null;
 
 	final Handler mHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
 			Log.i("", "msg-what="+msg.what);
 			switch (msg.what){
-			
+
+			case DISPLAY_TOAST:
+				displayToast((CharSequence)msg.obj);
+				break;
+
 			case BT_CONNECTION_ESTABLISHED:
 				displayToast( (CharSequence)msg.obj);
 				if (msg.arg1 == 1){ //1 for server side, 2 for client
@@ -59,19 +60,20 @@ public class MainActivity extends Activity {
 					clientButton.setText("*Connected*");
 				}
 				break;
-				
-			case MESSAGE_TEXTVIEW_READ:
+
+			case MESSAGE_READ:
 				displayInChat((CharSequence)msg.obj);
 				break;
-				
-			case SOCKET:
+
+			case SOCKET_ESTABLISHED:
 				socket = (BluetoothSocket) msg.obj;
+				chatSession = new Chat(this, socket);
 				break;
-				
+
 			case SOCKET_LISTENING:
 				serverButton.setText("Listening for connections..");
 				break;
-				
+
 			case SOCKET_CONNECTING:
 				clientButton.setText("Trying to connect..");
 				break;
@@ -89,11 +91,9 @@ public class MainActivity extends Activity {
 		clientButton = (Button) findViewById(R.id.startBtClientBtn);
 		serverButton = (Button) findViewById(R.id.startBtServerBtn);
 		inputField = (EditText) findViewById(R.id.inputField);
-		
+
 		//Check if bluetooth is enabled, prompt user to enable it
 		BTCommon.checkPhoneSettings(this);
-		
-		
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
 
 	public void startBluetoothClient(View view){
 		Log.i("", "Starting BT client in MainActivity");
-		
+
 		BTCommunicator btClient = new BTCommunicator(mHandler);
 		String serverMAC = "0C:DF:A4:71:6D:06";
 		btClient.connectToServer(serverMAC);
@@ -120,54 +120,30 @@ public class MainActivity extends Activity {
 
 	public void startBluetoothServer(View view){
 		Log.i("", "Starting BT server in MainActivity");
-		
+
 		BTCommunicator btServer = new BTCommunicator(mHandler);
 		btServer.startListening();
 	}
 
-	public void sendChatData(View view){
-		Log.i("sendData", "Started writing stream");
-		if(socket==null){
-			displayToast("No connection (socket null)");
-			return;
-		}
-
-		//Obtain the string from the textinput:
-		String string = inputField.getText().toString().trim()+"\n";
+	public void sendChatData(View view) throws Exception{
+		//Obtain the string from the textinput, reset the inputField:
+		String message = inputField.getText().toString().trim()+"\n";
+		displayInChat("me: "+ message.replaceAll("(\\r|\\n)", "")); //cheap fix which removes the line change at the end of the string
 		inputField.setText("");
-		
-        try {
-			PrintWriter writer = new PrintWriter(socket.getOutputStream());
-			writer.write(string);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        displayInChat("me: "+ string.replaceAll("(\\r|\\n)", "")); //cheap fix which removes the line change at the end of the string
-        Log.v("","Finished outputstream");
 
-	}
-	
-	public void readChatData(View view){
-		Log.i("readString", "Started reading stream");
-		if(socket==null){
-			displayToast("No connection (socket null)");
-			return;
+		//write data to bt socket:
+		if (chatSession.equals(null)){
+			throw new Exception("Chat class not initialized");
+		} else {
+			chatSession.sendMessage(message);
 		}
-		//Read some input for testing:
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			StringBuilder total = new StringBuilder();
-			String line;
-			if ((line = reader.readLine()) != null) {
-			    total.append(line);
-			}
-			
-			//display the read text on the UI:
-			displayInChat(total);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+	}
+
+	public void readChatData(View view) throws Exception{
+		if (chatSession.equals(null)){
+			throw new Exception("Chat class not initialized");
+		} else {
+			displayInChat(chatSession.receiveMessage());
 		}
 	}
 
@@ -175,10 +151,9 @@ public class MainActivity extends Activity {
 		TextView tv = (TextView) findViewById(R.id.textView1);
 		tv.setText(tv.getText().toString() +"\n"+charseq);
 	}
+
+
 	private void displayToast(CharSequence message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 	}
-	
-	
-
 }

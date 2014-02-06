@@ -1,8 +1,6 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -23,9 +21,10 @@ class AcceptThread extends Thread {
 		// because mmServerSocket is final
 		this.mBluetoothAdapter = mBluetoothAdapter;
 		BluetoothServerSocket tmp = null;
+		
 		try {
 			// MY_UUID is the app's UUID string, also used by the client code
-			tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
+			tmp = this.mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
 		} catch (IOException e) { }
 		mmServerSocket = tmp;
 	}
@@ -58,13 +57,12 @@ class AcceptThread extends Thread {
 		}
 	}
 	private void manageConnectedSocket(final BluetoothSocket socket){
-		//!TODO
 		//Create a new thread for the work
 		Log.i("AcceptThread", "manageSocket started, notifying UI");
 		Thread messageThread = (new Thread() {
 			public void run() {
 				
-				Message msg_socket = handler.obtainMessage(MainActivity.SOCKET,socket);
+				Message msg_socket = handler.obtainMessage(MainActivity.SOCKET_ESTABLISHED,socket);
 				handler.sendMessage(msg_socket);
 
 				Message msg_complete = handler.obtainMessage();
@@ -77,9 +75,6 @@ class AcceptThread extends Thread {
 			}
 		});
 		messageThread.start();
-		
-//		new ConnectedThread(socket, handler).start();
-		
 	}
 
 	/** Will cancel the listening socket, and cause the thread to finish */

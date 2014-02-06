@@ -1,13 +1,11 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 
 class ConnectThread extends Thread {
@@ -19,7 +17,7 @@ class ConnectThread extends Thread {
         // Use activity temporary object that is later assigned to mmSocket,
         // because mmSocket is final
         BluetoothSocket tmp = null;
-        mmDevice = device;
+        this.mmDevice = device;
         this.handler = handler;
         
         
@@ -27,7 +25,7 @@ class ConnectThread extends Thread {
         // Get activity BluetoothSocket to connect with the given BluetoothDevice
         try {
             // MY_UUID is the app's UUID string, also used by the server code
-            tmp = device.createRfcommSocketToServiceRecord(BTCommon.MY_UUID);
+            tmp = mmDevice.createRfcommSocketToServiceRecord(BTCommon.MY_UUID);
         } catch (IOException e) { }
         mmSocket = tmp;
     }
@@ -59,7 +57,7 @@ class ConnectThread extends Thread {
     	Thread messageThread = (new Thread() {
     	    public void run() {
     	    	
-    	    	Message msg_socket = handler.obtainMessage(MainActivity.SOCKET,socket);
+    	    	Message msg_socket = handler.obtainMessage(MainActivity.SOCKET_ESTABLISHED,socket);
 				handler.sendMessage(msg_socket);
 				
     	    	//Display a toast in the UI:
