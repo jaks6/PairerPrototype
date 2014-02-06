@@ -1,18 +1,22 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
+import java.util.UUID;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.util.Log;
 
-public class Bluetooth {
+public class BTCommon {
+	public static String NAME = "PairerPrototype";
+	public static UUID MY_UUID = UUID.fromString("ea738d90-52b0-11e3-8f96-0800200c9a66");
+	
+	
 	static BluetoothAdapter mBluetoothAdapter =  BluetoothAdapter.getDefaultAdapter();
-	private int REQUEST_ENABLE_BT = 1;
+	private static int REQUEST_ENABLE_BT = 1;	
 	
 	
-	
-	
-	public Bluetooth(Activity activity){
+	public static void checkPhoneSettings(Activity activity){
 		//Check if device supports bluetooth:
 		if (mBluetoothAdapter == null) {
 		    //!TODO
@@ -26,5 +30,4 @@ public class Bluetooth {
 			}
 		}
 	}
-
 }

@@ -31,7 +31,7 @@ public class ConnectedThread extends Thread {
         
         //Notify UI of connected status:
         Message msg_complete = handler.obtainMessage();
-		msg_complete.what = MainActivity.TASK_COMPLETE;
+		msg_complete.what = MainActivity.BT_CONNECTION_ESTABLISHED;
 		msg_complete.obj = "Connected";
 		handler.sendMessage(msg_complete);
  

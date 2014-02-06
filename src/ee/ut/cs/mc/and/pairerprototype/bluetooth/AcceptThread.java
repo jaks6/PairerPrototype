@@ -25,13 +25,18 @@ class AcceptThread extends Thread {
 		BluetoothServerSocket tmp = null;
 		try {
 			// MY_UUID is the app's UUID string, also used by the client code
-			tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BluetoothCommon.NAME, BluetoothCommon.MY_UUID);
+			tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
 		} catch (IOException e) { }
 		mmServerSocket = tmp;
 	}
 
 	public void run() {
 		BluetoothSocket socket = null;
+		
+		//Show connecting status on UI:
+    	Message msg = handler.obtainMessage(MainActivity.SOCKET_LISTENING);
+        handler.sendMessage(msg);
+		
 		// Keep listening until exception occurs or a socket is returned
 		while (true) {
 			try {
@@ -63,7 +68,7 @@ class AcceptThread extends Thread {
 				handler.sendMessage(msg_socket);
 
 				Message msg_complete = handler.obtainMessage();
-				msg_complete.what = MainActivity.TASK_COMPLETE;
+				msg_complete.what = MainActivity.BT_CONNECTION_ESTABLISHED;
 				msg_complete.arg1 = 1;
 				msg_complete.obj = "Serverside - client connection accepted";
 				handler.sendMessage(msg_complete);

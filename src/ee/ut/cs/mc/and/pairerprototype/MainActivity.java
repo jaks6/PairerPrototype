@@ -18,8 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.Bluetooth;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.BluetoothCommon;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.Client;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.Server;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
@@ -28,10 +27,10 @@ public class MainActivity extends Activity {
 	/*
 	 * Status indicators
 	 */
-	static final int DOWNLOAD_COMPLETE = 2;
-	public static final int CONNECTION_ACCEPTED = 3;
-	public static final int TASK_COMPLETE = 4;
+	public static final int BT_CONNECTION_ESTABLISHED = 4;
 	public static final int SOCKET = 11;
+	public static final int SOCKET_LISTENING = 12;
+	public static final int SOCKET_CONNECTING = 13;
 	public static final int MESSAGE_READ = 5;
 	public static final int MESSAGE_TEXTVIEW_READ = 6;
 	
@@ -51,23 +50,35 @@ public class MainActivity extends Activity {
 		public void handleMessage(Message msg) {
 			Log.i("", "msg-what="+msg.what);
 			switch (msg.what){
-			case TASK_COMPLETE:
-				Toast.makeText(getApplicationContext(), (CharSequence) msg.obj, Toast.LENGTH_SHORT).show();
+			
+			case BT_CONNECTION_ESTABLISHED:
+				displayToast( (CharSequence)msg.obj);
 				if (msg.arg1 == 1){ //1 for server side, 2 for client
 					serverButton.setText("*Connected*");
-				} else {
-					clientButton.setText("Connected");
+				} else if (msg.arg1 == 2){
+					clientButton.setText("*Connected*");
 				}
 				break;
+				
 			case MESSAGE_TEXTVIEW_READ:
-				displayInTextView((CharSequence)msg.obj);
+				displayInChat((CharSequence)msg.obj);
 				break;
+				
 			case SOCKET:
 				socket = (BluetoothSocket) msg.obj;
+				break;
+				
+			case SOCKET_LISTENING:
+				serverButton.setText("Listening for connections..");
+				break;
+				
+			case SOCKET_CONNECTING:
+				clientButton.setText("Trying to connect..");
 				break;
 			}
 			super.handleMessage(msg);
 		}
+
 	};
 
 	@Override
@@ -78,7 +89,9 @@ public class MainActivity extends Activity {
 		clientButton = (Button) findViewById(R.id.startBtClientBtn);
 		serverButton = (Button) findViewById(R.id.startBtServerBtn);
 		inputField = (EditText) findViewById(R.id.inputField);
-		Bluetooth bluetoothHelper = new Bluetooth(this);
+		
+		//Check if bluetooth is enabled, prompt user to enable it
+		BTCommon.checkPhoneSettings(this);
 		
 		
 	}
@@ -107,13 +120,13 @@ public class MainActivity extends Activity {
 	public void startBluetoothServer(View view){
 		Log.i("", "Starting BT server in MainActivity");
 		Server btServer = new Server();
-		btServer.startListening(BluetoothCommon.NAME, BluetoothCommon.MY_UUID, mHandler);
+		btServer.startListening(BTCommon.NAME, BTCommon.MY_UUID, mHandler);
 	}
 
 	public void sendData(View view){
 		Log.i("sendData", "Started writing stream");
 		if(socket==null){
-			Log.e("readData", "Socket NULL");
+			displayToast("No connection (socket null)");
 			return;
 		}
 
@@ -128,7 +141,7 @@ public class MainActivity extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-        displayInTextView("me: "+ string.replaceAll("(\\r|\\n)", "")); //cheap fix which removes the line change at the end of the string
+        displayInChat("me: "+ string.replaceAll("(\\r|\\n)", "")); //cheap fix which removes the line change at the end of the string
         Log.v("","Finished outputstream");
 
 	}
@@ -136,7 +149,7 @@ public class MainActivity extends Activity {
 	public void readData(View view){
 		Log.i("readString", "Started reading stream");
 		if(socket==null){
-			Log.e("readData", "Socket NULL");
+			displayToast("No connection (socket null)");
 			return;
 		}
 		//Read some input for testing:
@@ -150,16 +163,21 @@ public class MainActivity extends Activity {
 //			reader.close();
 			
 			//display the read text on the UI:
-			displayInTextView(total);
+			displayInChat(total);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void displayInTextView(CharSequence charseq){
+	public void displayInChat(CharSequence charseq){
 		TextView tv = (TextView) findViewById(R.id.textView1);
 		tv.setText(tv.getText().toString() +"\n"+charseq);
 	}
+	private void displayToast(CharSequence message) {
+		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+	}
+	
+	
 
 }

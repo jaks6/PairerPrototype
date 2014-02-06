@@ -27,13 +27,18 @@ class ConnectThread extends Thread {
         // Get activity BluetoothSocket to connect with the given BluetoothDevice
         try {
             // MY_UUID is the app's UUID string, also used by the server code
-            tmp = device.createRfcommSocketToServiceRecord(BluetoothCommon.MY_UUID);
+            tmp = device.createRfcommSocketToServiceRecord(BTCommon.MY_UUID);
         } catch (IOException e) { }
         mmSocket = tmp;
     }
  
     public void run() {
         try {
+        	
+        	//Show connecting status on UI:
+        	Message msg = handler.obtainMessage(MainActivity.SOCKET_CONNECTING);
+	        handler.sendMessage(msg);
+	        
             // Connect the device through the socket. This will block
             // until it succeeds or throws an exception
             mmSocket.connect();
@@ -50,17 +55,16 @@ class ConnectThread extends Thread {
     }
     
     private void manageConnectedSocket(final BluetoothSocket socket){
-    	//!TODO
-    	//Create activity new thread for the work
+    	//Create new thread for the work
     	Thread messageThread = (new Thread() {
     	    public void run() {
     	    	
     	    	Message msg_socket = handler.obtainMessage(MainActivity.SOCKET,socket);
 				handler.sendMessage(msg_socket);
 				
-    	    	//Display a toast:
+    	    	//Display a toast in the UI:
     	    	Message msg = handler.obtainMessage();
-    	        msg.what = MainActivity.TASK_COMPLETE;
+    	        msg.what = MainActivity.BT_CONNECTION_ESTABLISHED;
     	        msg.arg1 = 2;
     	        msg.obj = "Client succesfully connected";
     	        handler.sendMessage(msg);
@@ -69,7 +73,6 @@ class ConnectThread extends Thread {
     	});
     	messageThread.start();
     	
-//    	new ConnectedThread(socket, handler).start();
     }
  
     /** Will cancel an in-progress connection, and close the socket */
