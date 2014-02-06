@@ -19,13 +19,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.Client;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.Server;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
+	
 	/*
-	 * Status indicators
+	 * Status codes
 	 */
 	public static final int BT_CONNECTION_ESTABLISHED = 4;
 	public static final int SOCKET = 11;
@@ -112,18 +112,20 @@ public class MainActivity extends Activity {
 
 	public void startBluetoothClient(View view){
 		Log.i("", "Starting BT client in MainActivity");
-		Client btClient = new Client(mHandler);
+		
+		BTCommunicator btClient = new BTCommunicator(mHandler);
 		String serverMAC = "0C:DF:A4:71:6D:06";
 		btClient.connectToServer(serverMAC);
 	}
 
 	public void startBluetoothServer(View view){
 		Log.i("", "Starting BT server in MainActivity");
-		Server btServer = new Server();
-		btServer.startListening(BTCommon.NAME, BTCommon.MY_UUID, mHandler);
+		
+		BTCommunicator btServer = new BTCommunicator(mHandler);
+		btServer.startListening();
 	}
 
-	public void sendData(View view){
+	public void sendChatData(View view){
 		Log.i("sendData", "Started writing stream");
 		if(socket==null){
 			displayToast("No connection (socket null)");
@@ -146,7 +148,7 @@ public class MainActivity extends Activity {
 
 	}
 	
-	public void readData(View view){
+	public void readChatData(View view){
 		Log.i("readString", "Started reading stream");
 		if(socket==null){
 			displayToast("No connection (socket null)");
@@ -160,7 +162,6 @@ public class MainActivity extends Activity {
 			if ((line = reader.readLine()) != null) {
 			    total.append(line);
 			}
-//			reader.close();
 			
 			//display the read text on the UI:
 			displayInChat(total);
