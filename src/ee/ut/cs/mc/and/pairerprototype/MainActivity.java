@@ -28,7 +28,6 @@ public class MainActivity extends Activity {
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
 	public static final int MESSAGE_READ = 5;
-//	public static final int MESSAGE_TEXTVIEW_READ = 6;
 
 
 	/* 
@@ -62,7 +61,9 @@ public class MainActivity extends Activity {
 				break;
 
 			case MESSAGE_READ:
-				displayInChat((CharSequence)msg.obj);
+				//convert read bytes into a string and display them
+				String message = new String((byte[]) msg.obj, 0, msg.arg1);
+				displayInChat(message);
 				break;
 
 			case SOCKET_ESTABLISHED:
@@ -127,8 +128,8 @@ public class MainActivity extends Activity {
 
 	public void sendChatData(View view) throws Exception{
 		//Obtain the string from the textinput, reset the inputField:
-		String message = inputField.getText().toString().trim()+"\n";
-		displayInChat("me: "+ message.replaceAll("(\\r|\\n)", "")); //cheap fix which removes the line change at the end of the string
+		String message = inputField.getText().toString().trim();
+		displayInChat("me: "+ message);
 		inputField.setText("");
 
 		//write data to bt socket:
@@ -136,14 +137,6 @@ public class MainActivity extends Activity {
 			throw new Exception("Chat class not initialized");
 		} else {
 			chatSession.sendMessage(message);
-		}
-	}
-
-	public void readChatData(View view) throws Exception{
-		if (chatSession.equals(null)){
-			throw new Exception("Chat class not initialized");
-		} else {
-			displayInChat(chatSession.receiveMessage());
 		}
 	}
 

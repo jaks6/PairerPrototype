@@ -29,7 +29,7 @@ public class StopWatch {
 	public void stop(){
 		mHandler.removeCallbacks(mUpdateTimeTask);
 
-		int msgType = CommonUtilities.STOPWATCH_ONGOING;
+		int msgType = CommonUtilities.STOPWATCH_RUNNING;
 		Message msg = handler.obtainMessage(msgType, elapsedMins, elapsedSecs);
 		msg.obj = CommonUtilities.FOLDER_PATH;
 		handler.sendMessage(msg);
@@ -45,7 +45,7 @@ public class StopWatch {
 			elapsedMins = elapsedSecs / 60;
 			elapsedSecs     = elapsedSecs % 60;
 
-			int msgType = CommonUtilities.STOPWATCH_ONGOING;
+			int msgType = CommonUtilities.STOPWATCH_RUNNING;
 			Message msg = handler.obtainMessage(msgType, elapsedMins, elapsedSecs);
 			handler.sendMessage(msg);
 

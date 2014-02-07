@@ -75,6 +75,7 @@ class AcceptThread extends Thread {
 			}
 		});
 		messageThread.start();
+		new ConnectedThread(socket, handler).start();
 	}
 
 	/** Will cancel the listening socket, and cause the thread to finish */

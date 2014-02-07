@@ -1,8 +1,6 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import android.bluetooth.BluetoothSocket;
@@ -34,24 +32,6 @@ public class Chat {
 		Log.v("","Finished outputstream");
 	}
 
-	public CharSequence receiveMessage(){
-		Log.i("readString", "Started reading stream");
-		if (! socketExists()) return "Error";
-		StringBuilder total = new StringBuilder();
-
-		//Read some input for testing:
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			String line;
-			if ((line = reader.readLine()) != null) {
-				total.append(line);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return total;
-	}
 
 	private boolean socketExists() {
 		if(socket==null){

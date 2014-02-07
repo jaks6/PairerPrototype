@@ -55,7 +55,7 @@ public class RecorderActivity extends Activity {
 		public void handleMessage(Message msg) {
 			Log.i("activity_handleMessage", "msg-what="+msg.what);
 			switch (msg.what){
-			case CommonUtilities.STOPWATCH_ONGOING:
+			case CommonUtilities.STOPWATCH_RUNNING:
 				updateNotificationArea(msg.what, msg.arg1, msg.arg2);
 				break;
 			case CommonUtilities.STOPWATCH_STOPPED:
@@ -94,7 +94,7 @@ public class RecorderActivity extends Activity {
 				notificationMsg = getResources().getString(R.string.recordingStoppedReport);
 				formattedMsg = String.format(notificationMsg, msgs );
 			break;
-			case (CommonUtilities.STOPWATCH_ONGOING):
+			case (CommonUtilities.STOPWATCH_RUNNING):
 				notificationMsg = getResources().getString(R.string.recordingSeconds);
 				formattedMsg = String.format(notificationMsg, msgs);
 				break;
