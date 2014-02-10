@@ -38,8 +38,14 @@ public class MainActivity extends Activity {
 	EditText inputField;
 
 
-	BluetoothSocket socket = null;
-	Chat chatSession = null;
+	static BluetoothSocket socket = null;
+	static Chat chatSession = null;
+	AppRunningNotification runningNotification = null;
+
+	/*
+	 * STRING TAGS FOR LOGGING
+	 */
+	String appState = "App State:";
 
 	final Handler mHandler = new Handler(){
 		@Override
@@ -87,23 +93,20 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i(appState, "onCreate");
 		setContentView(R.layout.activity_main);
 
 		clientButton = (Button) findViewById(R.id.startBtClientBtn);
 		serverButton = (Button) findViewById(R.id.startBtServerBtn);
 		inputField = (EditText) findViewById(R.id.inputField);
 
+
+		runningNotification = new AppRunningNotification(this.getApplicationContext());
+		runningNotification.display();
+
 		//Check if bluetooth is enabled, prompt user to enable it
 		BTCommon.checkPhoneSettings(this);
 	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
 
 	/** Called when the user clicks the 'open recorder activity' button */
 	public void openRecorderActivity(View view) {
@@ -133,15 +136,15 @@ public class MainActivity extends Activity {
 		inputField.setText("");
 
 		//write data to bt socket:
-		if (chatSession.equals(null)){
-			throw new Exception("Chat class not initialized");
-		} else {
+		if (chatSession !=null){
 			chatSession.sendMessage(message);
+		} else {
+			displayToast("Chat class not initialized. Is a data connetion running?");
 		}
 	}
 
 	public void displayInChat(CharSequence charseq){
-		TextView tv = (TextView) findViewById(R.id.textView1);
+		TextView tv = (TextView) findViewById(R.id.chatTextView);
 		tv.setText(tv.getText().toString() +"\n"+charseq);
 	}
 
@@ -149,4 +152,51 @@ public class MainActivity extends Activity {
 	private void displayToast(CharSequence message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 	}
+
+	
+
+
+	/*
+	 * ACTIVITY LIFE CYCLE RELATED METHODS
+	 */
+
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+		//Restore chat session, manage connection
+		Log.i(appState, "onResume");
+	}
+
+	@Override
+	protected void onDestroy(){
+		super.onDestroy();
+		//Release resources - kill running threads.
+		
+		Log.i(appState, "onDestroy");
+		runningNotification.remove();
+		
+	}
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// Another activity is taking focus (this activity is about to be "paused").
+		Log.i(appState, "onPause");
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		// The activity is no longer visible (it is now "stopped")
+		Log.i(appState, "onStop");
+	}
+
+
+
 }
