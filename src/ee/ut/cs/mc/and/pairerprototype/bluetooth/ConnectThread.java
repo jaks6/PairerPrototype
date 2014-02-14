@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
+import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 class ConnectThread extends Thread {
     private final BluetoothSocket mmSocket;
@@ -34,7 +35,8 @@ class ConnectThread extends Thread {
         try {
         	
         	//Show connecting status on UI:
-        	Message msg = handler.obtainMessage(MainActivity.SOCKET_CONNECTING);
+        	Message msg = handler.obtainMessage(
+        			MainActivityHandler.SOCKET_CONNECTING);
 	        handler.sendMessage(msg);
 	        
             // Connect the device through the socket. This will block
@@ -57,12 +59,13 @@ class ConnectThread extends Thread {
     	Thread messageThread = (new Thread() {
     	    public void run() {
     	    	
-    	    	Message msg_socket = handler.obtainMessage(MainActivity.SOCKET_ESTABLISHED,socket);
+    	    	Message msg_socket = handler.obtainMessage(
+    	    			MainActivityHandler.SOCKET_ESTABLISHED,socket);
 				handler.sendMessage(msg_socket);
 				
     	    	//Display a toast in the UI:
     	    	Message msg = handler.obtainMessage();
-    	        msg.what = MainActivity.BT_CONNECTION_ESTABLISHED;
+    	        msg.what = MainActivityHandler.BT_CONNECTION_ESTABLISHED;
     	        msg.arg1 = 2;
     	        msg.obj = "Client succesfully connected";
     	        handler.sendMessage(msg);

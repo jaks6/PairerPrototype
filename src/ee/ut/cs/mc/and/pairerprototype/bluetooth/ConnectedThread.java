@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import ee.ut.cs.mc.and.pairerprototype.MainActivity;
-
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
+import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 public class ConnectedThread extends Thread {
     private final BluetoothSocket mmSocket;
@@ -31,7 +30,7 @@ public class ConnectedThread extends Thread {
         
         //Notify UI of connected status:
         Message msg_complete = handler.obtainMessage();
-		msg_complete.what = MainActivity.BT_CONNECTION_ESTABLISHED;
+		msg_complete.what = MainActivityHandler.BT_CONNECTION_ESTABLISHED;
 		msg_complete.obj = "Connected";
 		handler.sendMessage(msg_complete);
  
@@ -49,7 +48,7 @@ public class ConnectedThread extends Thread {
                 // Read from the InputStream
                 bytes = mmInStream.read(buffer);
                 // Send the obtained bytes to the UI activity
-                handler.obtainMessage(MainActivity.MESSAGE_READ, bytes, -1, buffer)
+                handler.obtainMessage(MainActivityHandler.MESSAGE_READ, bytes, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
                 break;

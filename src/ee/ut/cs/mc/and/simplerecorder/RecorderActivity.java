@@ -53,7 +53,7 @@ public class RecorderActivity extends Activity {
 	final Handler mHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
-			Log.i("activity_handleMessage", "msg-what="+msg.what);
+			Log.i("RecorderActivity_handleMessage", "msg-what="+msg.what);
 			switch (msg.what){
 			case CommonUtilities.STOPWATCH_RUNNING:
 				updateNotificationArea(msg.what, msg.arg1, msg.arg2);

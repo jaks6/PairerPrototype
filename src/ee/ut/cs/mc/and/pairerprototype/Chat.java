@@ -37,7 +37,7 @@ public class Chat {
 		if(socket==null){
 			//Notify UI of connected status:
 			Message msg_Toast = handler.obtainMessage();
-			msg_Toast.what = MainActivity.DISPLAY_TOAST;
+			msg_Toast.what = MainActivityHandler.DISPLAY_TOAST;
 			msg_Toast.obj = "No connection (socket null)";
 			handler.sendMessage(msg_Toast);
 			return false;

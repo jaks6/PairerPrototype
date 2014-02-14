@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
+import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 class AcceptThread extends Thread {
 	private final BluetoothServerSocket mmServerSocket;
@@ -33,7 +34,7 @@ class AcceptThread extends Thread {
 		BluetoothSocket socket = null;
 		
 		//Show connecting status on UI:
-    	Message msg = handler.obtainMessage(MainActivity.SOCKET_LISTENING);
+    	Message msg = handler.obtainMessage(MainActivityHandler.SOCKET_LISTENING);
         handler.sendMessage(msg);
 		
 		// Keep listening until exception occurs or a socket is returned
@@ -62,11 +63,11 @@ class AcceptThread extends Thread {
 		Thread messageThread = (new Thread() {
 			public void run() {
 				
-				Message msg_socket = handler.obtainMessage(MainActivity.SOCKET_ESTABLISHED,socket);
+				Message msg_socket = handler.obtainMessage(MainActivityHandler.SOCKET_ESTABLISHED,socket);
 				handler.sendMessage(msg_socket);
 
 				Message msg_complete = handler.obtainMessage();
-				msg_complete.what = MainActivity.BT_CONNECTION_ESTABLISHED;
+				msg_complete.what = MainActivityHandler.BT_CONNECTION_ESTABLISHED;
 				msg_complete.arg1 = 1;
 				msg_complete.obj = "Serverside - client connection accepted";
 				handler.sendMessage(msg_complete);

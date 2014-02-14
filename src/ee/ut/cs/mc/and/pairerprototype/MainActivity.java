@@ -11,30 +11,21 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeTask;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
 
-	/*
-	 * Status codes
-	 */
-	public static final int DISPLAY_TOAST = 1;
-	public static final int BT_CONNECTION_ESTABLISHED = 4;
-	public static final int SOCKET_ESTABLISHED = 11;
-	public static final int SOCKET_LISTENING = 12;
-	public static final int SOCKET_CONNECTING = 13;
-	public static final int MESSAGE_READ = 5;
-
-
 	/* 
 	 * UI ELEMENTS
 	 */
-	Button clientButton;
-	Button serverButton;
+	static Button clientButton;
+	static Button serverButton;
 	EditText inputField;
 
 
@@ -47,48 +38,8 @@ public class MainActivity extends Activity {
 	 */
 	String appState = "App State:";
 
-	final Handler mHandler = new Handler(){
-		@Override
-		public void handleMessage(Message msg) {
-			Log.i("", "msg-what="+msg.what);
-			switch (msg.what){
-
-			case DISPLAY_TOAST:
-				displayToast((CharSequence)msg.obj);
-				break;
-
-			case BT_CONNECTION_ESTABLISHED:
-				displayToast( (CharSequence)msg.obj);
-				if (msg.arg1 == 1){ //1 for server side, 2 for client
-					serverButton.setText("*Connected*");
-				} else if (msg.arg1 == 2){
-					clientButton.setText("*Connected*");
-				}
-				break;
-
-			case MESSAGE_READ:
-				//convert read bytes into a string and display them
-				String message = new String((byte[]) msg.obj, 0, msg.arg1);
-				displayInChat(message);
-				break;
-
-			case SOCKET_ESTABLISHED:
-				socket = (BluetoothSocket) msg.obj;
-				chatSession = new Chat(this, socket);
-				break;
-
-			case SOCKET_LISTENING:
-				serverButton.setText("Listening for connections..");
-				break;
-
-			case SOCKET_CONNECTING:
-				clientButton.setText("Trying to connect..");
-				break;
-			}
-			super.handleMessage(msg);
-		}
-
-	};
+	MainActivityHandler mHandler = new MainActivityHandler(this);
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +47,8 @@ public class MainActivity extends Activity {
 		Log.i(appState, "onCreate");
 		setContentView(R.layout.activity_main);
 
-		clientButton = (Button) findViewById(R.id.startBtClientBtn);
-		serverButton = (Button) findViewById(R.id.startBtServerBtn);
+		clientButton = (Button) findViewById(R.id.btnStartBtClient);
+		serverButton = (Button) findViewById(R.id.btnStartBtServer);
 		inputField = (EditText) findViewById(R.id.inputField);
 
 
@@ -112,6 +63,12 @@ public class MainActivity extends Activity {
 	public void openRecorderActivity(View view) {
 		Intent intent = new Intent(this, RecorderActivity.class);
 		startActivity(intent);
+	}
+
+	public void logSingleSequence(View view) {
+		AmplitudeTask ampTask = new AmplitudeTask(mHandler, this);
+		ampTask.execute();
+
 	}
 
 	public void startBluetoothClient(View view){
@@ -149,11 +106,11 @@ public class MainActivity extends Activity {
 	}
 
 
-	private void displayToast(CharSequence message) {
+	void displayToast(CharSequence message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 	}
 
-	
+
 
 
 	/*
@@ -179,10 +136,10 @@ public class MainActivity extends Activity {
 	protected void onDestroy(){
 		super.onDestroy();
 		//Release resources - kill running threads.
-		
+
 		Log.i(appState, "onDestroy");
 		runningNotification.remove();
-		
+
 	}
 	@Override
 	protected void onPause() {
@@ -196,7 +153,5 @@ public class MainActivity extends Activity {
 		// The activity is no longer visible (it is now "stopped")
 		Log.i(appState, "onStop");
 	}
-
-
 
 }

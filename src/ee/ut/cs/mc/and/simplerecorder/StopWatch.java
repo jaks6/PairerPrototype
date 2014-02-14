@@ -11,28 +11,27 @@ public class StopWatch {
 	private long startTime = 0;
 	private int elapsedSecs = 0;
 	private int elapsedMins = 0;
-	private Handler mHandler = new Handler();
-	private Handler handler;
+	private Handler mUIHandler;
 
 	public StopWatch(Handler handler) {
-		this.handler = handler;
+		this.mUIHandler = handler;
 	}
 	public void start(){
 		elapsedSecs = 0;
 		elapsedMins = 0;
 		startTime = SystemClock.uptimeMillis();
 
-		mHandler.removeCallbacks(mUpdateTimeTask);
-		mHandler.postDelayed(mUpdateTimeTask, 100);
+		mUIHandler.removeCallbacks(mUpdateTimeTask);
+		mUIHandler.postDelayed(mUpdateTimeTask, 100);
 	}
 
 	public void stop(){
-		mHandler.removeCallbacks(mUpdateTimeTask);
+		mUIHandler.removeCallbacks(mUpdateTimeTask);
 
-		int msgType = CommonUtilities.STOPWATCH_RUNNING;
-		Message msg = handler.obtainMessage(msgType, elapsedMins, elapsedSecs);
+		int msgType = CommonUtilities.STOPWATCH_STOPPED;
+		Message msg = mUIHandler.obtainMessage(msgType, elapsedMins, elapsedSecs);
 		msg.obj = CommonUtilities.FOLDER_PATH;
-		handler.sendMessage(msg);
+		mUIHandler.sendMessage(msg);
 
 	}
 
@@ -46,10 +45,10 @@ public class StopWatch {
 			elapsedSecs     = elapsedSecs % 60;
 
 			int msgType = CommonUtilities.STOPWATCH_RUNNING;
-			Message msg = handler.obtainMessage(msgType, elapsedMins, elapsedSecs);
-			handler.sendMessage(msg);
+			Message msg = mUIHandler.obtainMessage(msgType, elapsedMins, elapsedSecs);
+			mUIHandler.sendMessage(msg);
 
-			mHandler.postAtTime(this,
+			mUIHandler.postAtTime(this,
 					start + (((elapsedMins * 60) + elapsedSecs + 1) * 1000));
 		}
 	};
