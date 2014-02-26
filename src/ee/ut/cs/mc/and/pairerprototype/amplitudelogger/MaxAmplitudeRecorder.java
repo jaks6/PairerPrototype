@@ -29,7 +29,6 @@ public class MaxAmplitudeRecorder {
 			}
 		});
 
-//		mMediaRecorder.start();
 	}
 	
 	public void finish(){

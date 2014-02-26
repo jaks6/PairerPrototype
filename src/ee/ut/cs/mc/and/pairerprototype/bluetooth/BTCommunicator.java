@@ -12,16 +12,22 @@ public class BTCommunicator {
 	private BluetoothAdapter adapter;
 	private Handler handler;
 	
+	boolean useInsecureSecureRfcomm;  //Using this to see whether user notifications disappear in
+	//insecure socket method
+	
 	public BTCommunicator(Handler handler) {
+		
+		
 		this.adapter = BluetoothAdapter.getDefaultAdapter();
 		this.handler = handler;
+		this.useInsecureSecureRfcomm = false;
 		
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
 	}
 	
 	public void startListening (){
-		AcceptThread acceptThread = new AcceptThread(adapter, handler);
+		AcceptThread acceptThread = new AcceptThread(adapter, handler, useInsecureSecureRfcomm);
 		acceptThread.start();
 	}
 	
@@ -30,8 +36,13 @@ public class BTCommunicator {
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
         
-		ConnectThread connectThread = new ConnectThread(server, handler);
+        
+		ConnectThread connectThread = new ConnectThread(server, handler, useInsecureSecureRfcomm);
 		connectThread.start();
+	}
+
+	public void setSecureRfcomm(boolean isSecureRfcomm) {
+		this.useInsecureSecureRfcomm = isSecureRfcomm;
 	}
 
 }
