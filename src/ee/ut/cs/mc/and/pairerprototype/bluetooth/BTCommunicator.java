@@ -3,6 +3,7 @@ package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
+import android.util.Log;
 
 /** This class has methods to act as a both the client and the server in
  * a bluetooth connection
@@ -14,6 +15,7 @@ public class BTCommunicator {
 	
 	boolean useInsecureSecureRfcomm;  //Using this to see whether user notifications disappear in
 	//insecure socket method
+	private String TAG = "BTCommunicator";
 	
 	public BTCommunicator(Handler handler) {
 		
@@ -27,6 +29,7 @@ public class BTCommunicator {
 	}
 	
 	public void startListening (){
+		Log.d(TAG , "Starting to listen for incoming BT connections");
 		AcceptThread acceptThread = new AcceptThread(adapter, handler, useInsecureSecureRfcomm);
 		acceptThread.start();
 	}
@@ -36,12 +39,12 @@ public class BTCommunicator {
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
         
-        
+        Log.d(TAG , "Started connecting to BT server");
 		ConnectThread connectThread = new ConnectThread(server, handler, useInsecureSecureRfcomm);
 		connectThread.start();
 	}
 
-	public void setSecureRfcomm(boolean isSecureRfcomm) {
+	public void setInsecureRfcomm(boolean isSecureRfcomm) {
 		this.useInsecureSecureRfcomm = isSecureRfcomm;
 	}
 

@@ -15,6 +15,7 @@ class AcceptThread extends Thread {
 	private final BluetoothServerSocket mmServerSocket;
 	private BluetoothAdapter mBluetoothAdapter;
 	private Handler handler;
+	private String TAG = "AcceptThread";
 
 	public AcceptThread(BluetoothAdapter mBluetoothAdapter, Handler handler, Boolean useInsecureRFCOMM) {
 		this.handler = handler;
@@ -27,8 +28,10 @@ class AcceptThread extends Thread {
 		try {
 			if (useInsecureRFCOMM){
 				// MY_UUID is the app's UUID string, also used by the client code
+				Log.v(TAG  , "Using insecure RFCOMM channel");
 				tmp = this.mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
 			} else {
+				Log.v(TAG , "Using secure RFCOMM channel");
 				tmp = this.mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
 			}
 		} catch (IOException e) { }

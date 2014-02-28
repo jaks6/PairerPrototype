@@ -6,12 +6,14 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 class ConnectThread extends Thread {
 	private final BluetoothSocket mmSocket;
 	private final BluetoothDevice mmDevice;
 	private Handler handler;
+	private String TAG = "ConnectThread";
 
 	public ConnectThread(BluetoothDevice device, Handler handler, Boolean useInsecureRfcomm) {
 		// Use activity temporary object that is later assigned to mmSocket,
@@ -26,8 +28,10 @@ class ConnectThread extends Thread {
 		// MY_UUID is the app's UUID string, also used by the server code
 		try {
 			if (useInsecureRfcomm){
+				Log.v(TAG , "Using insecure RFCOMM channel");
 				tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(BTCommon.MY_UUID);
 			} else {
+				Log.v(TAG , "Using secure RFCOMM channel");
 				tmp = mmDevice.createRfcommSocketToServiceRecord(BTCommon.MY_UUID);
 				
 			}

@@ -14,7 +14,6 @@ import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeTask;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.Pairer;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
@@ -30,7 +29,7 @@ public class MainActivity extends Activity {
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
 	AppRunningNotification runningNotification = null;
-	Pairer myPairer = null;
+//	Pairer myPairer = null;
 
 	/*
 	 * STRING TAGS FOR LOGGING
@@ -44,7 +43,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i(appState, "onCreate");
-		myPairer = new Pairer(this);
 		
 		setContentView(R.layout.activity_main);
 
@@ -78,7 +76,7 @@ public class MainActivity extends Activity {
 		BTCommunicator btClient = new BTCommunicator(mHandler);
 		String serverMACSII = "0C:DF:A4:71:6D:06";
 		String serverMACXperia = "D0:51:62:93:E8:CE";
-//		btClient.setSecureRfcomm(false);
+		btClient.setInsecureRfcomm(true);
 		btClient.connectToServer(serverMACXperia);
 	}
 
@@ -86,7 +84,7 @@ public class MainActivity extends Activity {
 		Log.i("", "Starting BT server in MainActivity");
 
 		BTCommunicator btServer = new BTCommunicator(mHandler);
-//		btServer.setSecureRfcomm(false);
+		btServer.setInsecureRfcomm(true);
 		btServer.startListening();
 	}
 
@@ -142,7 +140,6 @@ public class MainActivity extends Activity {
 		//Release resources - kill running threads.
 
 		Log.i(appState, "onDestroy");
-		myPairer.destroy(this);
 		runningNotification.remove();
 
 	}
