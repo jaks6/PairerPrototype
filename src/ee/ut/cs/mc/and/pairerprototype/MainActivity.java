@@ -14,6 +14,7 @@ import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeTask;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
+import ee.ut.cs.mc.and.pairerprototype.wifip2p.WifiP2pCommon;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
@@ -29,14 +30,15 @@ public class MainActivity extends Activity {
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
 	AppRunningNotification runningNotification = null;
-//	Pairer myPairer = null;
-
+	WifiP2pCommon mWifiManager;
+	
 	/*
 	 * STRING TAGS FOR LOGGING
 	 */
 	String appState = "App State:";
 
 	MainActivityHandler mHandler = new MainActivityHandler(this);
+	private String TAG = "MainActivity";
 	
 
 	@Override
@@ -56,6 +58,9 @@ public class MainActivity extends Activity {
 
 		//Check if bluetooth is enabled, prompt user to enable it
 		BTCommon.checkPhoneSettings(this);
+		
+		mWifiManager = new WifiP2pCommon(this);
+//		mWifiManager.checkPhoneSettings(0);
 	}
 
 	/** Called when the user clicks the 'open recorder activity' button */
@@ -86,6 +91,11 @@ public class MainActivity extends Activity {
 		BTCommunicator btServer = new BTCommunicator(mHandler);
 		btServer.setInsecureRfcomm(true);
 		btServer.startListening();
+	}
+	
+	public void connectToWifi(View view){
+		Log.i(TAG, "Connecting to WiFi device");
+		mWifiManager.connectTo();
 	}
 
 	public void sendChatData(View view) throws Exception{

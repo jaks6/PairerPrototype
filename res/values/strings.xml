@@ -21,5 +21,6 @@
     <string name="recordingSeconds">Recording.. %1$02d:%2$02d </string>
     <string name="recordingStoppedReport">Created recording in folder: %1$s \nwith a duration of: %2$02d:%3$02d.</string>
     <string name="RecordButtonRecording">Stop Recording</string>
+    <string name="btnWifiConnect">WiFi  \nconnect</string>
 
 </resources>
