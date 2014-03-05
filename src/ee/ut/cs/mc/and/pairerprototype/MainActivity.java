@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,7 +30,6 @@ public class MainActivity extends Activity {
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
 	AppRunningNotification runningNotification = null;
-//	Pairer myPairer = null;
 
 	/*
 	 * STRING TAGS FOR LOGGING
@@ -37,13 +37,13 @@ public class MainActivity extends Activity {
 	String appState = "App State:";
 
 	MainActivityHandler mHandler = new MainActivityHandler(this);
-	
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i(appState, "onCreate");
-		
+
 		setContentView(R.layout.activity_main);
 
 		clientButton = (Button) findViewById(R.id.btnStartBtClient);
@@ -88,6 +88,11 @@ public class MainActivity extends Activity {
 		btServer.startListening();
 	}
 
+	public void openSettingsActivity(View view){
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+	}
+
 	public void sendChatData(View view) throws Exception{
 		//Obtain the string from the textinput, reset the inputField:
 		String message = inputField.getText().toString().trim();
@@ -125,6 +130,17 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			startActivity(new Intent(this, SettingsActivity.class));
+			return false;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
