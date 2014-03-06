@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeTask;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
+import ee.ut.cs.mc.and.pairerprototype.network.NetworkManager;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
@@ -30,6 +32,7 @@ public class MainActivity extends Activity {
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
 	AppRunningNotification runningNotification = null;
+	NetworkManager mNetworkmanager;
 
 	/*
 	 * STRING TAGS FOR LOGGING
@@ -53,6 +56,9 @@ public class MainActivity extends Activity {
 
 		runningNotification = new AppRunningNotification(this.getApplicationContext());
 		runningNotification.display();
+		
+
+		mNetworkmanager = new NetworkManager(this);
 
 		//Check if bluetooth is enabled, prompt user to enable it
 		BTCommon.checkPhoneSettings(this);
@@ -138,6 +144,11 @@ public class MainActivity extends Activity {
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			return false;
+			
+		case R.id.action_connect:
+			mNetworkmanager.runThread(inputField.getText().toString());
+			return false;
+			
 		default:
 			return super.onOptionsItemSelected(item);
 		}

@@ -3,6 +3,7 @@
 
     <string name="app_name">PairerPrototype</string>
     <string name="action_settings">Settings</string>
+    <string name="action_connect">Connect to server</string>
     <string name="hello_world">Hello world!</string>
 
     
@@ -23,9 +24,10 @@
     <string name="RecordButtonRecording">Stop Recording</string>
 
     
-    <!-- Preferences -->
+    <!-- Menu Main -->
     <string name="pref_connectivity_title">Connectivity</string>
     <string name="pref_serverip">Server IP address</string>
     <string name="pref_serverip_default">0.0.0.0</string>
     <string name="pref_serverip_summ">IP address for the server which the client will interact with</string>
+    
 </resources>
