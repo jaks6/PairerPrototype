@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +31,7 @@ public class MainActivity extends Activity {
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
 	AppRunningNotification runningNotification = null;
-	NetworkManager mNetworkmanager;
+	public static NetworkManager mNetworkmanager;
 
 	/*
 	 * STRING TAGS FOR LOGGING
@@ -73,7 +72,8 @@ public class MainActivity extends Activity {
 	public void logSingleSequence(View view) {
 		AmplitudeTask ampTask = new AmplitudeTask(mHandler, this);
 		ampTask.execute();
-
+		mNetworkmanager.initialize();
+		
 	}
 
 	public void startBluetoothClient(View view){
@@ -82,8 +82,9 @@ public class MainActivity extends Activity {
 		BTCommunicator btClient = new BTCommunicator(mHandler);
 		String serverMACSII = "0C:DF:A4:71:6D:06";
 		String serverMACXperia = "D0:51:62:93:E8:CE";
+		String serverNexus5 = "CC:FA:00:16:2B:9A";
 		btClient.setInsecureRfcomm(true);
-		btClient.connectToServer(serverMACXperia);
+		btClient.connectToServer(serverNexus5);
 	}
 
 	public void startBluetoothServer(View view){
@@ -146,7 +147,8 @@ public class MainActivity extends Activity {
 			return false;
 			
 		case R.id.action_connect:
-			mNetworkmanager.runThread(inputField.getText().toString());
+			mNetworkmanager.initialize();
+			mNetworkmanager.interactWithServer(inputField.getText().toString());
 			return false;
 			
 		default:

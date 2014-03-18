@@ -20,38 +20,51 @@ public class NetworkManager {
 	Handler mHandler;
 	Context context;
 	Activity activity;
-
+	
+	URL url;
+	URLConnection connection;
+	OutputStreamWriter out;
+	
 	public NetworkManager(Activity activity){
 		this.activity = activity;
 	}
 
-
-
-	public void runThread(final String inputString){
-
+	public void initialize(){
 		//get IP from preferences, default to 0.0.0.0 if unsuccessful
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 		final String serverIP = "http://" + prefs.getString("pref_serverip", "0.0.0.0");
 		
 		new Thread(new Runnable() {
+			public void run() {
+				try{
+					URL url = new URL(serverIP + "/Server/Sequence");
+					Log.d("URL", url.toString());
+					connection = url.openConnection();
+					connection.setDoOutput(true);
+
+				}catch(Exception e)
+				{
+					Log.d("Exception",e.toString());
+				}
+
+			}
+		}).start();
+	}
+	
+	
+	public void interactWithServer(final String inputString){
+		
+		new Thread(new Runnable() {
 			private int doubledValue;
 
 			public void run() {
-
 				try{
-					URL url = new URL(serverIP + "/Server/Double");
-					Log.d("URL", url.toString());
-					URLConnection connection = url.openConnection();
-
+					out = new OutputStreamWriter(connection.getOutputStream());
 					Log.d("inputString", inputString);
-
-					connection.setDoOutput(true);
-					OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 					out.write(inputString);
 					out.close();
 
 					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
 					String returnString="";
 					doubledValue =0;
 
@@ -75,7 +88,6 @@ public class NetworkManager {
 					msg.obj = "Answer is = "+ doubledValue;
 					mHandler.dispatchMessage(msg);
 					
-					
 
 				}catch(Exception e)
 				{
@@ -86,5 +98,7 @@ public class NetworkManager {
 		}).start();
 
 	}
+	
+	
 
 }

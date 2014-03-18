@@ -2,6 +2,9 @@ package ee.ut.cs.mc.and.pairerprototype.amplitudelogger;
 
 import java.util.ArrayList;
 
+import ee.ut.cs.mc.and.pairerprototype.MainActivity;
+import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -33,9 +36,11 @@ public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
+		double progressPercentage = 100 * ( values[0] + 1.0)/AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE;
+		
 		Message msg = new Message();
 		msg.what = UPDATE_PROGRESSBAR;
-		msg.arg1 = values[0];
+		msg.arg1 = (int) progressPercentage;
 		mHandler.dispatchMessage(msg);
 	}
 
@@ -63,8 +68,7 @@ public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
 				e.printStackTrace();
 			} 
 
-			double progressPercentage = 100 * (i+1.0)/AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE;
-			publishProgress((int) progressPercentage);
+			publishProgress(i);
 		}
 		mMaxAmpRecorder.mMediaRecorder.stop();
 		return capturedSequence;
@@ -84,6 +88,9 @@ public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
 		
 		mMaxAmpRecorder.mMediaRecorder.release();
 //		mMaxAmpRecorder.finish();
+		
+		/** Send recorded sequence to server */
+		new PostSequenceTask(MainActivity.mNetworkmanager).execute(result.toString());
 	}
 
 
