@@ -1,9 +1,16 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,26 +19,31 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeTask;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
+import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
+import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.CaptureTask;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
 import ee.ut.cs.mc.and.pairerprototype.network.NetworkManager;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
 public class MainActivity extends Activity {
 
+	private static final String TAG = "MainActivity";
 	/* 
 	 * UI ELEMENTS
 	 */
 	static Button clientButton;
 	static Button serverButton;
 	EditText inputField;
+	public static ProgressDialog loadingDialog;
+	AppRunningNotification runningNotification = null;
 
 
 	static BluetoothSocket socket = null;
 	static Chat chatSession = null;
-	AppRunningNotification runningNotification = null;
 	public static NetworkManager mNetworkmanager;
+	ScheduledThreadPoolExecutor sch;
+	
+	static boolean isCapturing = false;
 
 	/*
 	 * STRING TAGS FOR LOGGING
@@ -47,20 +59,29 @@ public class MainActivity extends Activity {
 		Log.i(appState, "onCreate");
 
 		setContentView(R.layout.activity_main);
-
 		clientButton = (Button) findViewById(R.id.btnStartBtClient);
 		serverButton = (Button) findViewById(R.id.btnStartBtServer);
 		inputField = (EditText) findViewById(R.id.inputField);
 
-
 		runningNotification = new AppRunningNotification(this.getApplicationContext());
 		runningNotification.display();
-		
+
 
 		mNetworkmanager = new NetworkManager(this);
 
 		//Check if bluetooth is enabled, prompt user to enable it
-		BTCommon.checkPhoneSettings(this);
+//		BTCommon.checkPhoneSettings(this);
+
+		//find device's difference to a server
+		try {
+			doTimeSync();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void doTimeSync() throws InterruptedException {
+		new SyncTimeTask(this).execute();
 	}
 
 	/** Called when the user clicks the 'open recorder activity' button */
@@ -69,11 +90,48 @@ public class MainActivity extends Activity {
 		startActivity(intent);
 	}
 
-	public void logSingleSequence(View view) {
-		AmplitudeTask ampTask = new AmplitudeTask(mHandler, this);
-		ampTask.execute();
-		mNetworkmanager.initialize();
+	public void startAmplitudeCapture(View view) {
+		if (!isCapturing){
+		((Button) findViewById(R.id.btnAmplitudeCapture))
+		.setText(getString(R.string.captureSequences_turnOff));
 		
+		isCapturing = true;
+	    createScheduledThreadPool();
+	    
+		} else {
+			((Button) findViewById(R.id.btnAmplitudeCapture))
+			.setText(getString(R.string.captureSequences_turnOn));
+			
+			isCapturing = false;
+			sch.shutdownNow();
+		}
+	}
+
+	private void createScheduledThreadPool() {
+		sch = (ScheduledThreadPoolExecutor)
+	    	    Executors.newScheduledThreadPool(3);
+	    System.out.println("Submission Time: " + SystemClock.elapsedRealtime());
+
+	    Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
+	    long initialDelay = calculateInitialDelay();
+	    Log.d(TAG, "initDelay= " + initialDelay);
+	    
+        ScheduledFuture<?> periodicFuture = sch.scheduleAtFixedRate(doCaptureTask, initialDelay, 10000, TimeUnit.MILLISECONDS);
+	}
+
+	private long calculateInitialDelay() {
+		long delay = 0;
+		long curTime = SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF;
+		long upToLastFour = curTime / 10000;
+		long LastFourNullified = upToLastFour * 10000;   // same no of digits as curTime, but last four are 0-s
+		long lastFour = curTime- ( upToLastFour *10000);
+		
+		if (lastFour > 9000){
+			delay = 20000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified) ;
+		} else {
+			delay = 10000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified);
+		}
+		return delay;
 	}
 
 	public void startBluetoothClient(View view){
@@ -138,19 +196,18 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			return false;
-			
+
 		case R.id.action_connect:
-			mNetworkmanager.initialize();
 			mNetworkmanager.interactWithServer(inputField.getText().toString());
 			return false;
-			
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}

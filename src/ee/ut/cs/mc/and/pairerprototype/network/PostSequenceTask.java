@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.net.URLConnection;
 
 import android.os.AsyncTask;
@@ -19,11 +20,12 @@ public class PostSequenceTask extends AsyncTask<String, Object, Object>
 
 	@Override
 	protected Object doInBackground(String... params) {
-		if (networkManager.connection == null){
-			Log.e(TAG, "networkManager not initialized, stopping sequence POST");
-			return null;
+		URLConnection connection = null;
+		try {
+			connection = NetworkManager.initURLConnection();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
-		URLConnection connection = networkManager.connection;
 		String inputString = (String) params[0]; 
 		Log.d("attempting to post string to sever=", inputString);
 		

@@ -14,7 +14,11 @@
     <string name="sendBtData">Send Data</string>
     <string name="readBtData">Read Data</string>
     
+    <string name="captureSequences_turnOn">Start Amp Logging</string>
+    <string name="captureSequences_turnOff">Stop Logging</string>
+    
     <string name="chatWindow">---------</string>
+    <string name="loading_dialog_title">Loading</string>
     
     
     <!-- Recorder related string -->

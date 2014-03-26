@@ -1,6 +1,7 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
@@ -12,11 +13,15 @@ public class MainActivityHandler extends Handler {
 	 */
 	public static final int DISPLAY_TOAST = 1;
 	public static final int UPDATE_PROGRESSBAR = 2;
-	public static final int BT_CONNECTION_ESTABLISHED = 4;
+	public static final int DISPLAY_LOADING_DIALOG = 3;
+	public static final int REMOVE_LOADING_DIALOG = 4;
+	public static final int BT_CONNECTION_ESTABLISHED = 5;
+	public static final int MESSAGE_READ = 6;
+	
 	public static final int SOCKET_ESTABLISHED = 11;
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
-	public static final int MESSAGE_READ = 5;
+	private static final int LOADING_DIALOG_ADDTEXT = 0;
 	
 	private Activity mActivity;
 	
@@ -26,6 +31,7 @@ public class MainActivityHandler extends Handler {
 	
 	@Override
 	public void handleMessage(Message msg) {
+		String message = "";
 		switch (msg.what){
 
 		case DISPLAY_TOAST:
@@ -43,10 +49,23 @@ public class MainActivityHandler extends Handler {
 
 		case MESSAGE_READ:
 			//convert read bytes into a string and display them
-			String message = new String((byte[]) msg.obj, 0, msg.arg1);
+			message = new String((byte[]) msg.obj, 0, msg.arg1);
 			((MainActivity) mActivity).displayInChat(message);
 			break;
-
+			
+		case DISPLAY_LOADING_DIALOG:
+			message = (String) msg.obj;
+			String dialogTitle = mActivity.getString(R.string.loading_dialog_title);
+			MainActivity.loadingDialog = ProgressDialog.show(mActivity, dialogTitle, 
+					message, true);
+			break;
+			
+		case REMOVE_LOADING_DIALOG:
+			if (MainActivity.loadingDialog != null){
+				MainActivity.loadingDialog.dismiss();
+			}
+			break;
+			
 		case SOCKET_ESTABLISHED:
 			MainActivity.socket = (BluetoothSocket) msg.obj;
 			MainActivity.chatSession = new Chat(this, MainActivity.socket);

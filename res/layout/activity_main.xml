@@ -35,8 +35,11 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/sendDataBtn"
         android:layout_alignLeft="@+id/openRecorderButton"
+        android:layout_alignRight="@+id/textScroll"
         android:ems="10"
-        android:gravity="center_vertical|center_horizontal|fill_horizontal" android:inputType="text">
+        android:gravity="center_vertical|center_horizontal|fill_horizontal"
+        android:inputType="text" >
+
     </EditText>
 
     <Button
@@ -80,21 +83,24 @@
         android:text="@string/openRecorderButton" />
 
     <Button
-        android:id="@+id/btnAmplitudeSequence"
+        android:id="@+id/btnAmplitudeCapture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/progressBar1"
+        android:layout_alignBottom="@+id/openRecorderButton"
         android:layout_alignLeft="@+id/btnStartBtServer"
         android:layout_alignTop="@+id/openRecorderButton"
-        android:onClick="logSingleSequence"
-        android:text="log amplitude" />
+        android:layout_below="@+id/progressBar1"
+        android:onClick="startAmplitudeCapture"
+        android:text="@string/captureSequences_turnOn" />
 
     <ProgressBar
         android:id="@+id/progressBar1"
-        style="?android:attr/progressBarStyleHorizontal"
+        style="@style/tallerBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+         />
 
 </RelativeLayout>

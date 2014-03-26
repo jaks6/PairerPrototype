@@ -7,21 +7,23 @@ import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 
-public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
+public class CaptureTask extends AsyncTask<Void, Integer, ArrayList<String>> {
 
 	int UPDATE_PROGRESSBAR = 2;
-	String TAG = "AmplitudeTask";
+	String TAG = "CaptureTask";
 	MaxAmplitudeRecorder mMaxAmpRecorder;
-	ArrayList<Long> capturedSequence;
-	Handler mHandler;
+	ArrayList<String> capturedSequence;
+	Handler handler;
 
-	public AmplitudeTask(Handler handler, Context context) {
-		this.mHandler = handler;
+	public CaptureTask(Handler handler, Context context) {
+		this.handler = handler;
 		
 		//!TODO make the recording path some secure in-app location
 		String sdCardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -41,25 +43,26 @@ public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
 		Message msg = new Message();
 		msg.what = UPDATE_PROGRESSBAR;
 		msg.arg1 = (int) progressPercentage;
-		mHandler.dispatchMessage(msg);
+		handler.dispatchMessage(msg);
 	}
 
 	/** Creates a single timestamped max amplitude capturedSequence in the form
 	 * of an arrayList, the first element of which is the timestamp
 	 * @return 
 	 */
-	public ArrayList<Long> recordSequence(){
+	public ArrayList<String> recordSequence(){
 		Log.d(TAG, "started capturedSequence capture");
-		capturedSequence = new ArrayList<Long>();
+		capturedSequence = new ArrayList<String>();
 
 		mMaxAmpRecorder.start();
-		long currentTime = System.currentTimeMillis();
+		long currentTime = SystemClock.elapsedRealtime();
+		capturedSequence.add(""+ (currentTime + AmplitudeUtils.TIME_DIFF));
 		
-		capturedSequence.add(currentTime + AmplitudeUtils.timeDiff);
+		capturedSequence.add(Build.MODEL);
 
 		for (int i=0; i<AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE; i++){
 			//gather a sample
-			capturedSequence.add((long) mMaxAmpRecorder.mMediaRecorder.getMaxAmplitude());
+			capturedSequence.add(""+ (long) mMaxAmpRecorder.mMediaRecorder.getMaxAmplitude());
 
 			try {
 				Thread.sleep(AmplitudeUtils.SAMPLING_INTERVAL);//!TODO replace with something more effective
@@ -76,15 +79,15 @@ public class AmplitudeTask extends AsyncTask<Void, Integer, ArrayList<Long>> {
 
 
 	@Override
-	protected ArrayList<Long> doInBackground(Void... params) {
+	protected ArrayList<String> doInBackground(Void... params) {
 		return recordSequence();
 	}
 
 
 	@Override
-	protected void onPostExecute(ArrayList<Long> result) {
+	protected void onPostExecute(ArrayList<String> result) {
 		Log.i("AMPLITUDE SEQUENCE READ - ", result.toString());
-		AmplitudeUtils.writeStringAsFile(result.toString(), "capturedSequence.txt");
+//		AmplitudeUtils.writeStringAsFile(result.toString(), "capturedSequence.txt");
 		
 		mMaxAmpRecorder.mMediaRecorder.release();
 //		mMaxAmpRecorder.finish();
