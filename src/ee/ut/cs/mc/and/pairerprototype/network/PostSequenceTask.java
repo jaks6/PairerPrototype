@@ -4,34 +4,34 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.net.URLConnection;
+
+import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class PostSequenceTask extends AsyncTask<String, Object, Object>
+public class PostSequenceTask extends AsyncTask<JSONObject, Object, Object>
 {
 	NetworkManager networkManager;
-	private String  TAG ="PostSequenceTask";
+	private String  TAG = "PostSequenceTask";
 	public PostSequenceTask(NetworkManager networkManager) {
 		this.networkManager = networkManager;
 	}
 
 	@Override
-	protected Object doInBackground(String... params) {
+	protected Object doInBackground(JSONObject... params) {
 		URLConnection connection = null;
 		try {
 			connection = NetworkManager.initURLConnection();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		String inputString = (String) params[0]; 
-		Log.d("attempting to post string to sever=", inputString);
+		Log.d("attempting to post json to sever=", params[0].toString());
 		
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-			out.write(inputString);
+			out.write(params[0].toString());
 			out.close();
 			
 			

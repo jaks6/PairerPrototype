@@ -2,6 +2,10 @@ package ee.ut.cs.mc.and.pairerprototype.amplitudelogger;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
@@ -14,7 +18,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class CaptureTask extends AsyncTask<Void, Integer, ArrayList<String>> {
+public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 
 	int UPDATE_PROGRESSBAR = 2;
 	String TAG = "CaptureTask";
@@ -32,7 +36,6 @@ public class CaptureTask extends AsyncTask<Void, Integer, ArrayList<String>> {
 
 	@Override
 	protected void onPreExecute() {
-		// TODO Auto-generated method stub
 		super.onPreExecute();
 	}
 
@@ -49,43 +52,47 @@ public class CaptureTask extends AsyncTask<Void, Integer, ArrayList<String>> {
 	/** Creates a single timestamped max amplitude capturedSequence in the form
 	 * of an arrayList, the first element of which is the timestamp
 	 * @return 
+	 * @throws JSONException 
+	 * @throws InterruptedException 
 	 */
-	public ArrayList<String> recordSequence(){
+	public JSONObject recordSequence(JSONObject json) throws JSONException, InterruptedException{
 		Log.d(TAG, "started capturedSequence capture");
-		capturedSequence = new ArrayList<String>();
 
 		mMaxAmpRecorder.start();
 		long currentTime = SystemClock.elapsedRealtime();
-		capturedSequence.add(""+ (currentTime + AmplitudeUtils.TIME_DIFF));
-		
-		capturedSequence.add(Build.MODEL);
+		json.put("timestamp", currentTime + AmplitudeUtils.TIME_DIFF);
+		json.put("device", Build.MODEL);
 
+		JSONArray sequenceJson = new JSONArray();
 		for (int i=0; i<AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE; i++){
 			//gather a sample
-			capturedSequence.add(""+ (long) mMaxAmpRecorder.mMediaRecorder.getMaxAmplitude());
-
-			try {
-				Thread.sleep(AmplitudeUtils.SAMPLING_INTERVAL);//!TODO replace with something more effective
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
+			int sample = mMaxAmpRecorder.mMediaRecorder.getMaxAmplitude();
+			sequenceJson.put(sample);
+			Thread.sleep(AmplitudeUtils.SAMPLING_INTERVAL);//!TODO replace with something more effective
 
 			publishProgress(i);
 		}
-		mMaxAmpRecorder.mMediaRecorder.stop();
-		return capturedSequence;
+		json.put("sequence", sequenceJson);
+		return json;
 	}
 
 
 	@Override
-	protected ArrayList<String> doInBackground(Void... params) {
-		return recordSequence();
+	protected JSONObject doInBackground(Void... params) {
+		JSONObject json = new JSONObject();
+		try {
+			return recordSequence(json);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return json;
 	}
 
 
 	@Override
-	protected void onPostExecute(ArrayList<String> result) {
+	protected void onPostExecute(JSONObject result) {
 		Log.i("AMPLITUDE SEQUENCE READ - ", result.toString());
 //		AmplitudeUtils.writeStringAsFile(result.toString(), "capturedSequence.txt");
 		
@@ -93,7 +100,7 @@ public class CaptureTask extends AsyncTask<Void, Integer, ArrayList<String>> {
 //		mMaxAmpRecorder.finish();
 		
 		/** Send recorded sequence to server */
-		new PostSequenceTask(MainActivity.mNetworkmanager).execute(result.toString());
+		new PostSequenceTask(MainActivity.mNetworkmanager).execute(result);
 	}
 
 
