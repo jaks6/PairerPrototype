@@ -14,7 +14,7 @@ public class SyncTimeTask extends AsyncTask<Void, Integer, List<Long>> {
 
 	private static final int REQUEST_INTERVAL_LENGTH = 2000;
 	private static final int TIMEOUT_PERIOD = 3000;
-	private static final int NO_OF_REQUESTS = 6;
+	private static final int NO_OF_REQUESTS = 4;
 	private static final String NTP_SERVER = "ntp.estpak.ee";
 
 	long timeDiff = 0;

@@ -9,8 +9,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ public class MainActivity extends Activity {
 	 */
 	static Button clientButton;
 	static Button serverButton;
+	Button toggleCaptureButton;
 	EditText inputField;
 	public static ProgressDialog loadingDialog;
 	AppRunningNotification runningNotification = null;
@@ -42,7 +45,7 @@ public class MainActivity extends Activity {
 	static Chat chatSession = null;
 	public static NetworkManager mNetworkmanager;
 	ScheduledThreadPoolExecutor sch;
-	
+
 	static boolean isCapturing = false;
 
 	/*
@@ -61,6 +64,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		clientButton = (Button) findViewById(R.id.btnStartBtClient);
 		serverButton = (Button) findViewById(R.id.btnStartBtServer);
+		toggleCaptureButton = (Button) findViewById(R.id.btnAmplitudeCapture);
 		inputField = (EditText) findViewById(R.id.inputField);
 
 		runningNotification = new AppRunningNotification(this.getApplicationContext());
@@ -70,7 +74,7 @@ public class MainActivity extends Activity {
 		mNetworkmanager = new NetworkManager(this);
 
 		//Check if bluetooth is enabled, prompt user to enable it
-//		BTCommon.checkPhoneSettings(this);
+		//		BTCommon.checkPhoneSettings(this);
 
 		//find device's difference to a server
 		try {
@@ -90,33 +94,46 @@ public class MainActivity extends Activity {
 		startActivity(intent);
 	}
 
-	public void startAmplitudeCapture(View view) {
+	public void toggleAmplitudeCapture(View view) {
 		if (!isCapturing){
-		((Button) findViewById(R.id.btnAmplitudeCapture))
-		.setText(getString(R.string.captureSequences_turnOff));
-		
-		isCapturing = true;
-	    createScheduledThreadPool();
-	    
+			toggleCaptureButton
+			.setText(getString(R.string.captureSequences_turnOff));
+
+			isCapturing = true;
+			createScheduledThreadPool();
+
 		} else {
-			((Button) findViewById(R.id.btnAmplitudeCapture))
+			toggleCaptureButton
 			.setText(getString(R.string.captureSequences_turnOn));
-			
+
 			isCapturing = false;
 			sch.shutdownNow();
+
 		}
 	}
 
 	private void createScheduledThreadPool() {
 		sch = (ScheduledThreadPoolExecutor)
-	    	    Executors.newScheduledThreadPool(3);
-	    System.out.println("Submission Time: " + SystemClock.elapsedRealtime());
+				Executors.newScheduledThreadPool(3);
+		System.out.println("Submission Time: " + SystemClock.elapsedRealtime());
 
-	    Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
-	    long initialDelay = calculateInitialDelay();
-	    Log.d(TAG, "initDelay= " + initialDelay);
-	    
-        ScheduledFuture<?> periodicFuture = sch.scheduleAtFixedRate(doCaptureTask, initialDelay, 10000, TimeUnit.MILLISECONDS);
+		Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
+		long initialDelay = calculateInitialDelay();
+		Log.d(TAG, "initDelay= " + initialDelay);
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		boolean scheduleOnce = prefs.getBoolean("pref_record_once", false);
+
+		if (scheduleOnce){
+			Log.d(TAG, "scheduling *ONE* recording");
+			sch.schedule(doCaptureTask, initialDelay, TimeUnit.MILLISECONDS);
+			isCapturing=false;
+			toggleCaptureButton.setText(R.string.captureSequences_turnOn);
+
+		} else {
+			Log.d(TAG, "SCHEDULING Periodic recording");
+			ScheduledFuture<?> periodicFuture = sch.scheduleAtFixedRate(doCaptureTask, initialDelay, 10000, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	private long calculateInitialDelay() {
@@ -125,7 +142,7 @@ public class MainActivity extends Activity {
 		long upToLastFour = curTime / 10000;
 		long LastFourNullified = upToLastFour * 10000;   // same no of digits as curTime, but last four are 0-s
 		long lastFour = curTime- ( upToLastFour *10000);
-		
+
 		if (lastFour > 9000){
 			delay = 20000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified) ;
 		} else {

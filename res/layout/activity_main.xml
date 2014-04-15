@@ -90,7 +90,7 @@
         android:layout_alignLeft="@+id/btnStartBtServer"
         android:layout_alignTop="@+id/openRecorderButton"
         android:layout_below="@+id/progressBar1"
-        android:onClick="startAmplitudeCapture"
+        android:onClick="toggleAmplitudeCapture"
         android:text="@string/captureSequences_turnOn" />
 
     <ProgressBar

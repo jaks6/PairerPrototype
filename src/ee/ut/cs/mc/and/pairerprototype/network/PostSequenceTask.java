@@ -23,7 +23,7 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, Object>
 	protected Object doInBackground(JSONObject... params) {
 		URLConnection connection = null;
 		try {
-			connection = NetworkManager.initURLConnection();
+			connection = NetworkManager.initURLConnection("json");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

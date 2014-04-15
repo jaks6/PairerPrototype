@@ -6,9 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ee.ut.cs.mc.and.pairerprototype.MainActivity;
-import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
-
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,6 +14,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
+import ee.ut.cs.mc.and.pairerprototype.MainActivity;
+import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
 public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 
@@ -25,13 +24,13 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 	MaxAmplitudeRecorder mMaxAmpRecorder;
 	ArrayList<String> capturedSequence;
 	Handler handler;
-
+	
 	public CaptureTask(Handler handler, Context context) {
 		this.handler = handler;
-		
 		//!TODO make the recording path some secure in-app location
 		String sdCardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
 		mMaxAmpRecorder = new MaxAmplitudeRecorder(sdCardPath+  "/recording.3gp");
+		
 	}
 
 	@Override
@@ -73,6 +72,7 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 			publishProgress(i);
 		}
 		json.put("sequence", sequenceJson);
+		
 		return json;
 	}
 
@@ -94,14 +94,12 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 	@Override
 	protected void onPostExecute(JSONObject result) {
 		Log.i("AMPLITUDE SEQUENCE READ - ", result.toString());
-//		AmplitudeUtils.writeStringAsFile(result.toString(), "capturedSequence.txt");
 		
 		mMaxAmpRecorder.mMediaRecorder.release();
 //		mMaxAmpRecorder.finish();
 		
 		/** Send recorded sequence to server */
 		new PostSequenceTask(MainActivity.mNetworkmanager).execute(result);
+		
 	}
-
-
 }

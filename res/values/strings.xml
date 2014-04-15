@@ -34,4 +34,7 @@
     <string name="pref_serverip_default">0.0.0.0</string>
     <string name="pref_serverip_summ">IP address for the server which the client will interact with</string>
     
+    <string name="pref_record_once">Record once</string>
+    <string name="pref_record_once_summ">Instead of continuously streaming recordings, only create a single recording.</string>
+    <string name="pref_record_once_default">false</string>   
 </resources>

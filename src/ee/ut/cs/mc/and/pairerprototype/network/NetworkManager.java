@@ -32,10 +32,11 @@ public class NetworkManager {
 	 * @param String serverip - the URL to connect to
 	 * @throws IOException
 	 */
-	private static URLConnection initURLConnection(String serverIP) throws IOException {
+	private static URLConnection initURLConnection(String serverIP, String type) throws IOException {
 		URL url = new URL(serverIP);
 		Log.d("URL", url.toString());
 		URLConnection connection = url.openConnection();
+		connection.addRequestProperty("reqtype", type);
 		connection.setDoOutput(true);
 		return connection;
 	}
@@ -46,11 +47,11 @@ public class NetworkManager {
 	 * @return the URLConnection object
 	 * @throws IOException
 	 */
-	public static URLConnection initURLConnection() throws IOException{
+	public static URLConnection initURLConnection(String type) throws IOException{
 		//get IP from preferences, default to 0.0.0.0 if unsuccessful
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
 		final String serverIP = "http://" + prefs.getString("pref_serverip", "0.0.0.0");
-		return initURLConnection(serverIP + "/Server/Sequence");
+		return initURLConnection(serverIP + "/PairerPrototypeServer/sequence", type);
 	}
 
 
@@ -60,7 +61,7 @@ public class NetworkManager {
 			public void run() {
 				try{
 					URLConnection connection = null;
-					connection = initURLConnection();
+					connection = initURLConnection("");
 					out = new OutputStreamWriter(connection.getOutputStream());
 					Log.d("inputString", inputString);
 					out.write(inputString);
