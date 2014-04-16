@@ -14,7 +14,6 @@ public class AmplitudeUtils {
 	public static long TIME_DIFF = 0;
 	public static int SAMPLING_INTERVAL = 140;
 	public static int NO_OF_SAMPLES_IN_SEQUENCE = 50; // 50*140ms = 7s
-	public static long LAST_LAUNCH_TIME = 0;
 
 
 	public static void writeStringAsFile(final String fileContents, String fileName) {

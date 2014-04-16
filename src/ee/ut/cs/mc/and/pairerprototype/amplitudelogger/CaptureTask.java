@@ -15,6 +15,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.MainActivity;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
 public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
@@ -61,6 +62,7 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 		long currentTime = SystemClock.elapsedRealtime();
 		json.put("timestamp", currentTime + AmplitudeUtils.TIME_DIFF);
 		json.put("device", Build.MODEL);
+		json.put("mac", BTCommon.deviceMAC);
 
 		JSONArray sequenceJson = new JSONArray();
 		for (int i=0; i<AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE; i++){

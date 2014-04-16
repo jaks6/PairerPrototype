@@ -25,6 +25,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
+
 /**
  * {@hide}
  *
@@ -217,5 +219,22 @@ public class SntpClient
         // low order bits should be random data
         buffer[offset++] = (byte)(Math.random() * 255.0);
     }
+    
+    
+    /** Finds how long to wait so that recording is in sync for all devices*/
+	public static long calculateInitialDelay() {
+		long delay = 0;
+		long curTime = SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF;
+		long upToLastFour = curTime / 10000;
+		long LastFourNullified = upToLastFour * 10000;   // same no of digits as curTime, but last four are 0-s
+		long lastFour = curTime- ( upToLastFour *10000);
+
+		if (lastFour > 9000){
+			delay = 20000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified) ;
+		} else {
+			delay = 10000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified);
+		}
+		return delay;
+	}
 }
 

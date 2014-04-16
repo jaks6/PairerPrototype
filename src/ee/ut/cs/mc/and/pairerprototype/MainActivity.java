@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,7 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
-import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.CaptureTask;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
 import ee.ut.cs.mc.and.pairerprototype.network.NetworkManager;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
@@ -74,7 +75,7 @@ public class MainActivity extends Activity {
 		mNetworkmanager = new NetworkManager(this);
 
 		//Check if bluetooth is enabled, prompt user to enable it
-		//		BTCommon.checkPhoneSettings(this);
+		BTCommon.checkPhoneSettings(this);
 
 		//find device's difference to a server
 		try {
@@ -118,7 +119,7 @@ public class MainActivity extends Activity {
 		System.out.println("Submission Time: " + SystemClock.elapsedRealtime());
 
 		Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
-		long initialDelay = calculateInitialDelay();
+		long initialDelay = SntpClient.calculateInitialDelay();
 		Log.d(TAG, "initDelay= " + initialDelay);
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -135,21 +136,7 @@ public class MainActivity extends Activity {
 			ScheduledFuture<?> periodicFuture = sch.scheduleAtFixedRate(doCaptureTask, initialDelay, 10000, TimeUnit.MILLISECONDS);
 		}
 	}
-
-	private long calculateInitialDelay() {
-		long delay = 0;
-		long curTime = SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF;
-		long upToLastFour = curTime / 10000;
-		long LastFourNullified = upToLastFour * 10000;   // same no of digits as curTime, but last four are 0-s
-		long lastFour = curTime- ( upToLastFour *10000);
-
-		if (lastFour > 9000){
-			delay = 20000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified) ;
-		} else {
-			delay = 10000 - (SystemClock.elapsedRealtime() + AmplitudeUtils.TIME_DIFF - LastFourNullified);
-		}
-		return delay;
-	}
+	
 
 	public void startBluetoothClient(View view){
 		Log.i("", "Starting BT client in MainActivity");
@@ -228,6 +215,14 @@ public class MainActivity extends Activity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	@Override
+	protected void onActivityResult (int requestCode, int resultCode, Intent data)
+	{
+	  if ((requestCode == BTCommon.REQUEST_ENABLE_BT) && (resultCode == Activity.RESULT_OK))
+	  {
+		BTCommon.handleBluetoothTurnedOnEvent();
+	  }
 	}
 
 	@Override
