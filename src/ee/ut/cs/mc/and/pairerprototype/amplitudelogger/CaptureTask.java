@@ -101,7 +101,7 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 //		mMaxAmpRecorder.finish();
 		
 		/** Send recorded sequence to server */
-		new PostSequenceTask(MainActivity.mNetworkmanager).execute(result);
+		new PostSequenceTask(MainActivity.mNetworkmanager, handler).execute(result);
 		
 	}
 }

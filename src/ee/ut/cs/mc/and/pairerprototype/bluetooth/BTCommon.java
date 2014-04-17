@@ -11,6 +11,7 @@ public class BTCommon {
 	private static String TAG = "BTCommon";
 	public static String NAME = "PairerPrototype";
 	public static UUID MY_UUID = UUID.fromString("ea738d90-52b0-11e3-8f96-0800200c9a66");
+	public static final String UUID_BASE ="7d0cea40-c618-11e3-9c1a-"; // UUID_BASE+ MAC_ADDRESS will form a valid UUID for use in bluetooth connections
 	public static String deviceMAC;
 	
 	static BluetoothAdapter mBluetoothAdapter =  BluetoothAdapter.getDefaultAdapter();
@@ -19,7 +20,7 @@ public class BTCommon {
 	public static String getMACAddress(){
 		if ((mBluetoothAdapter != null) && (mBluetoothAdapter.isEnabled())){
 			return BluetoothAdapter.getDefaultAdapter().getAddress();
-		} else return null;
+		} else return "00000000";
 	}
 	public static void checkPhoneSettings(Activity activity){
 		//Check if device supports bluetooth:
@@ -28,12 +29,12 @@ public class BTCommon {
 		} else {
 			Log.v("", "Bluetooth is supported");
 			//Check if bluetooth is enabled. If not, request the user to enable it.
-			if (!mBluetoothAdapter.isEnabled()) {
+			if (!mBluetoothAdapter.isEnabled()) { 
 				Log.v("", "Bluetooth is not turned on");
 			    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			    activity.startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
 			} else {
-				getMACAddress();
+				deviceMAC = getMACAddress();
 			}
 		}
 	}
@@ -56,7 +57,7 @@ public class BTCommon {
 		    } else {
 		    	//BT should now be turned on
 		    	Log.d(TAG,"Fetching Bluetooth MAC address");
-		    	deviceMAC= getMACAddress();
+		    	deviceMAC = getMACAddress();
 		    }
 		
 	}

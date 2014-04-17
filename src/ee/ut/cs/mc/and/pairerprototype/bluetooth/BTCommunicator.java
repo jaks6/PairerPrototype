@@ -44,8 +44,8 @@ public class BTCommunicator {
 		connectThread.start();
 	}
 
-	public void setInsecureRfcomm(boolean isSecureRfcomm) {
-		this.useInsecureSecureRfcomm = isSecureRfcomm;
+	public void setInsecureRfcomm(boolean isInsecureRfcomm) {
+		this.useInsecureSecureRfcomm = isInsecureRfcomm;
 	}
 
 }

@@ -1,6 +1,7 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -23,16 +24,16 @@ class AcceptThread extends Thread {
 		// because mmServerSocket is final
 		this.mBluetoothAdapter = mBluetoothAdapter;
 		BluetoothServerSocket tmp = null;
-		
-		
+		UUID combinedUUID = UUID.fromString(BTCommon.UUID_BASE + BTCommon.deviceMAC.replace(":", ""));
 		try {
 			if (useInsecureRFCOMM){
 				// MY_UUID is the app's UUID string, also used by the client code
-				Log.v(TAG  , "Using insecure RFCOMM channel");
-				tmp = this.mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
+				Log.v(TAG  , "LISTENING Using insecure RFCOMM channel");
+				Log.v(TAG  , "UUID="+ combinedUUID.toString());
+				tmp = this.mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BTCommon.NAME, combinedUUID);
 			} else {
 				Log.v(TAG , "Using secure RFCOMM channel");
-				tmp = this.mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, BTCommon.MY_UUID);
+				tmp = this.mBluetoothAdapter.listenUsingRfcommWithServiceRecord(BTCommon.NAME, combinedUUID);
 			}
 		} catch (IOException e) { }
 		mmServerSocket = tmp;
