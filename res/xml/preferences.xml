@@ -14,4 +14,9 @@
         android:title="@string/pref_record_once"
         android:summary="@string/pref_record_once_summ"
         android:defaultValue="@string/pref_record_once_default"/>
+    <CheckBoxPreference
+        android:key="pref_nosync"
+        android:title="@string/pref_nosync"
+        android:summary="@string/pref_nosync_summ"
+        android:defaultValue="@string/pref_nosync_default"/>
 </PreferenceScreen>

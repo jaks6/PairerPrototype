@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 		runningNotification.display();
 
 
-		mNetworkmanager = new NetworkManager(this);
+		mNetworkmanager = NetworkManager.getInstance();
 
 		//Check if bluetooth is enabled, prompt user to enable it
 		BTCommon.checkPhoneSettings(this);
@@ -120,11 +120,13 @@ public class MainActivity extends Activity {
 
 		Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
 		long initialDelay = SntpClient.calculateInitialDelay();
+
+		boolean scheduleOnce = App.getPrefs().getBoolean("pref_record_once", false);
+		boolean dontSync = App.getPrefs().getBoolean("pref_nosync", false);
+		
+		initialDelay = (dontSync)? 0: initialDelay;
+
 		Log.d(TAG, "initDelay= " + initialDelay);
-
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		boolean scheduleOnce = prefs.getBoolean("pref_record_once", false);
-
 		if (scheduleOnce){
 			Log.d(TAG, "scheduling *ONE* recording");
 			sch.schedule(doCaptureTask, initialDelay, TimeUnit.MILLISECONDS);
@@ -209,7 +211,7 @@ public class MainActivity extends Activity {
 			return false;
 
 		case R.id.action_connect:
-			mNetworkmanager.interactWithServer(inputField.getText().toString());
+//			mNetworkmanager.interactWithServer(inputField.getText().toString());
 			return false;
 
 		default:

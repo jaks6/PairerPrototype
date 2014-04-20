@@ -20,8 +20,8 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 	NetworkManager networkManager;
 	Handler handler;
 	private String  TAG = "PostSequenceTask";
-	public PostSequenceTask(NetworkManager networkManager, Handler handler) {
-		this.networkManager = networkManager;
+	public PostSequenceTask(Handler handler) {
+		this.networkManager = NetworkManager.getInstance();
 		this.handler = handler;
 	}
 
@@ -29,7 +29,7 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 	protected JSONObject doInBackground(JSONObject... params) {
 		URLConnection connection = null;
 		try {
-			connection = NetworkManager.initURLConnection("json");
+			connection = networkManager.initURLConnection("json");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

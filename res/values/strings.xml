@@ -37,4 +37,8 @@
     <string name="pref_record_once">Record once</string>
     <string name="pref_record_once_summ">Instead of continuously streaming recordings, only create a single recording.</string>
     <string name="pref_record_once_default">false</string>   
+    
+    <string name="pref_nosync">Don\'t sync recording</string>
+    <string name="pref_nosync_summ">Start audio capture immediately, instead of waiting for synced recording.</string>
+    <string name="pref_nosync_default">false</string>   
 </resources>

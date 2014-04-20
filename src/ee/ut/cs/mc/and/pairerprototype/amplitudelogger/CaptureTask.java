@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
-import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
@@ -101,7 +100,7 @@ public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 //		mMaxAmpRecorder.finish();
 		
 		/** Send recorded sequence to server */
-		new PostSequenceTask(MainActivity.mNetworkmanager, handler).execute(result);
+		new PostSequenceTask(handler).execute(result);
 		
 	}
 }
