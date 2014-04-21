@@ -7,7 +7,7 @@ import android.util.Log;
 
 public class MaxAmplitudeRecorder {
 	
-	String TAG = "MaxAmplitudeRecorder";
+	static final String TAG = "MaxAmplitudeRecorder";
 	MediaRecorder mMediaRecorder;
 	
 	public MaxAmplitudeRecorder(String sdCardPath) {

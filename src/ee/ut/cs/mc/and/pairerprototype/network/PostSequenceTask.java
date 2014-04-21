@@ -13,13 +13,13 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BluetoothHelper;
 
 public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 {
 	NetworkManager networkManager;
 	Handler handler;
-	private String  TAG = "PostSequenceTask";
+	static final private String  TAG = "PostSequenceTask";
 	public PostSequenceTask(Handler handler) {
 		this.networkManager = NetworkManager.getInstance();
 		this.handler = handler;
@@ -77,7 +77,7 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 	protected void onPostExecute(JSONObject responseJSON) {
 		Log.v(TAG, "responseJSON = " + responseJSON.toString());
 		if (responseJSON != null){
-			BTCommunicator communicator = new BTCommunicator(handler);
+			BluetoothHelper communicator = new BluetoothHelper(handler);
 			communicator.setInsecureRfcomm(true);
 
 			//parse the UUID and MAC to connect to.
@@ -86,6 +86,7 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 			try {
 				connectToMAC = responseJSON.getString("connectto");
 				communicator.connectToServer(connectToMAC);
+				communicator.startListening();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

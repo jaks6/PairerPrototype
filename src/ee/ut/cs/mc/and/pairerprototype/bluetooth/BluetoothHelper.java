@@ -8,16 +8,16 @@ import android.util.Log;
 /** This class has methods to act as a both the client and the server in
  * a bluetooth connection
  */
-public class BTCommunicator {
+public class BluetoothHelper {
 	
 	private BluetoothAdapter adapter;
 	private Handler handler;
 	
 	boolean useInsecureSecureRfcomm;  //Using this to see whether user notifications disappear in
 	//insecure socket method
-	private String TAG = "BTCommunicator";
+	private String TAG = "BluetoothHelper";
 	
-	public BTCommunicator(Handler handler) {
+	public BluetoothHelper(Handler handler) {
 		
 		
 		this.adapter = BluetoothAdapter.getDefaultAdapter();

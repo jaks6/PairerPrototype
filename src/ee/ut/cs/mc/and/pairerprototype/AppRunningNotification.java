@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat;
 
 public class AppRunningNotification {
 
-	int mNotificationId;
+	static final int mNotificationId = 001;
 	Notification notification;
 	Context context;
 
@@ -20,7 +20,6 @@ public class AppRunningNotification {
 	 */
 	public AppRunningNotification(Context context){
 
-		this.mNotificationId = 001;
 		this.context = context;
 
 

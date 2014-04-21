@@ -19,8 +19,8 @@ import ee.ut.cs.mc.and.pairerprototype.network.PostSequenceTask;
 
 public class CaptureTask extends AsyncTask<Void, Integer, JSONObject> {
 
-	int UPDATE_PROGRESSBAR = 2;
-	String TAG = "CaptureTask";
+	static final int UPDATE_PROGRESSBAR = 2;
+	static final String TAG = "CaptureTask";
 	MaxAmplitudeRecorder mMaxAmpRecorder;
 	ArrayList<String> capturedSequence;
 	Handler handler;

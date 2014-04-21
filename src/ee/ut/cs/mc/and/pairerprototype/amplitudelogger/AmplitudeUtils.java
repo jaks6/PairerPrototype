@@ -10,10 +10,10 @@ import android.os.Handler;
 
 public class AmplitudeUtils {
 
-	public static String TAG = "Amplitude Utilities";
+	public static final String TAG = "Amplitude Utilities";
+	public static final int SAMPLING_INTERVAL = 140;
+	public static final int NO_OF_SAMPLES_IN_SEQUENCE = 50; // 50*140ms = 7s
 	public static long TIME_DIFF = 0;
-	public static int SAMPLING_INTERVAL = 140;
-	public static int NO_OF_SAMPLES_IN_SEQUENCE = 50; // 50*140ms = 7s
 
 
 	public static void writeStringAsFile(final String fileContents, String fileName) {
