@@ -1,11 +1,16 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
+import java.io.ObjectOutputStream;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.ProgressBar;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.ClientSocketThread;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.ServerSocketThread;
 
 public class MainActivityHandler extends Handler {
 	/*
@@ -16,14 +21,16 @@ public class MainActivityHandler extends Handler {
 	public static final int DISPLAY_LOADING_DIALOG = 3;
 	public static final int REMOVE_LOADING_DIALOG = 4;
 	public static final int BT_CONNECTION_ESTABLISHED = 5;
-	public static final int MESSAGE_READ = 6;
+	public static final int BT_MESSAGE_READ = 6;
 	
 	public static final int SOCKET_ESTABLISHED = 11;
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
 	private static final int LOADING_DIALOG_ADDTEXT = 0;
 	
+	static Chat chatSession = null;
 	private Activity mActivity;
+	private String TAG = MainActivityHandler.class.toString();
 	
 	public MainActivityHandler(Activity activity) {
 		this.mActivity = activity;
@@ -47,10 +54,31 @@ public class MainActivityHandler extends Handler {
 			}
 			break;
 
-		case MESSAGE_READ:
-			//convert read bytes into a string and display them
-			message = new String((byte[]) msg.obj, 0, msg.arg1);
-			((MainActivity) mActivity).displayInChat(message);
+		case BT_MESSAGE_READ:
+			//A message has been received via bluetooth.
+			ChatMsg chatMsg = (ChatMsg) msg.obj;
+			//Display the msg in main chat window
+			((MainActivity) mActivity).displayInChat(chatMsg.toString());
+			
+			
+			// Check if it should be broadcasted to other devices and do so.
+			ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
+			ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
+			ObjectOutputStream[] streams = {serverThread.getObjectOutStream(), 
+					clientThread.getObjectOutStream()};
+			
+			BluetoothSocket[] sockets = {serverThread.getSocket(), clientThread.getSocket()};
+			//broadcast to other BT devices
+			Log.d(TAG, "Starting rebroadcast checks");
+			for (int i= 0; i<2; i++){
+				if (streams[i] !=null && ! sockets[i].getRemoteDevice().getAddress().equals(chatMsg.from)){
+					Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
+							sockets[i].getRemoteDevice().getAddress(),
+							chatMsg.from));
+					Chat.sendMessage(chatMsg, streams[i]);
+					return; //this return ensures were only sending data one-way
+				}
+			}
 			break;
 			
 		case DISPLAY_LOADING_DIALOG:
@@ -68,7 +96,6 @@ public class MainActivityHandler extends Handler {
 			
 		case SOCKET_ESTABLISHED:
 			MainActivity.socket = (BluetoothSocket) msg.obj;
-			MainActivity.chatSession = new Chat(this, MainActivity.socket);
 			break;
 
 		case SOCKET_LISTENING:

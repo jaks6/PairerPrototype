@@ -92,7 +92,8 @@ class ConnectThread extends Thread {
 			}
 		});
 		messageThread.start();
-		new ConnectedThread(socket, handler).start();
+		ServerSocketThread.getInstance().setSocket(socket);
+		ServerSocketThread.getInstance().start();
 
 	}
 

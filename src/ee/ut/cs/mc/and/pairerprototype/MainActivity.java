@@ -7,13 +7,10 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommunicator;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.BluetoothHelper;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.ClientSocketThread;
+import ee.ut.cs.mc.and.pairerprototype.bluetooth.ServerSocketThread;
 import ee.ut.cs.mc.and.pairerprototype.network.NetworkManager;
 import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 
@@ -43,7 +42,6 @@ public class MainActivity extends Activity {
 
 
 	static BluetoothSocket socket = null;
-	static Chat chatSession = null;
 	public static NetworkManager mNetworkmanager;
 	ScheduledThreadPoolExecutor sch;
 
@@ -54,7 +52,7 @@ public class MainActivity extends Activity {
 	 */
 	String appState = "App State:";
 
-	MainActivityHandler mHandler = new MainActivityHandler(this);
+	MainActivityHandler mHandler;
 
 
 	@Override
@@ -71,7 +69,9 @@ public class MainActivity extends Activity {
 		runningNotification = new AppRunningNotification(this.getApplicationContext());
 		runningNotification.display();
 
-
+		mHandler = new MainActivityHandler(this);
+		App.setMainActivityHandler(mHandler);
+		
 		mNetworkmanager = NetworkManager.getInstance();
 
 		//Check if bluetooth is enabled, prompt user to enable it
@@ -143,18 +143,22 @@ public class MainActivity extends Activity {
 	public void startBluetoothClient(View view){
 		Log.i("", "Starting BT client in MainActivity");
 
-		BTCommunicator btClient = new BTCommunicator(mHandler);
+		BluetoothHelper btClient = new BluetoothHelper(mHandler);
 		String serverMACSII = "0C:DF:A4:71:6D:06";
 		String serverMACXperia = "D0:51:62:93:E8:CE";
 		String serverNexus5 = "CC:FA:00:16:2B:9A";
 		btClient.setInsecureRfcomm(true);
-		btClient.connectToServer(serverNexus5);
+		
+		//HACK FOR TESTING:
+		String server =(BTCommon.deviceMAC.equals(serverNexus5))? serverMACXperia:serverNexus5;
+		
+		btClient.connectToServer(server);
 	}
 
 	public void startBluetoothServer(View view){
 		Log.i("", "Starting BT server in MainActivity");
 
-		BTCommunicator btServer = new BTCommunicator(mHandler);
+		BluetoothHelper btServer = new BluetoothHelper(mHandler);
 		btServer.setInsecureRfcomm(true);
 		btServer.startListening();
 	}
@@ -166,16 +170,13 @@ public class MainActivity extends Activity {
 
 	public void sendChatData(View view) throws Exception{
 		//Obtain the string from the textinput, reset the inputField:
-		String message = inputField.getText().toString().trim();
-		displayInChat("me: "+ message);
+		ChatMsg chatmsg = new ChatMsg( inputField.getText().toString().trim());
+		displayInChat(chatmsg.toString());
 		inputField.setText("");
 
-		//write data to bt socket:
-		if (chatSession !=null){
-			chatSession.sendMessage(message);
-		} else {
-			displayToast("Chat class not initialized. Is a data connetion running?");
-		}
+		//write data to all bt sockets:
+		Chat.sendMessage(chatmsg, ClientSocketThread.getInstance().getObjectOutStream());
+		Chat.sendMessage(chatmsg, ServerSocketThread.getInstance().getObjectOutStream());
 	}
 
 	public void displayInChat(CharSequence charseq){
@@ -240,6 +241,8 @@ public class MainActivity extends Activity {
 		//Release resources - kill running threads.
 
 		Log.i(appState, "onDestroy");
+		ServerSocketThread.getInstance().cancel();
+		ClientSocketThread.getInstance().cancel();
 		runningNotification.remove();
 
 	}

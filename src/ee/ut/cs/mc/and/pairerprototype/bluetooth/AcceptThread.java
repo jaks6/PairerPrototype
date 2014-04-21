@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import ee.ut.cs.mc.and.pairerprototype.MainActivity;
 import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 class AcceptThread extends Thread {
@@ -85,7 +84,8 @@ class AcceptThread extends Thread {
 			}
 		});
 		messageThread.start();
-		new ConnectedThread(socket, handler).start();
+		ClientSocketThread.getInstance().setSocket(socket);
+		ClientSocketThread.getInstance().start();
 	}
 
 	/** Will cancel the listening socket, and cause the thread to finish */
