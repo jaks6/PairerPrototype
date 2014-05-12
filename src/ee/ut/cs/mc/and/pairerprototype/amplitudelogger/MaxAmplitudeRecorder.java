@@ -46,7 +46,7 @@ public class MaxAmplitudeRecorder {
 		
 			mMediaRecorder = new MediaRecorder();
 
-			mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
 			mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 			mMediaRecorder.setOutputFile(sdCardPath);
 			mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);

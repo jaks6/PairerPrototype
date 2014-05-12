@@ -1,6 +1,9 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
-import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -8,9 +11,8 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.ClientSocketThread;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.ServerSocketThread;
 
 public class MainActivityHandler extends Handler {
 	/*
@@ -23,10 +25,11 @@ public class MainActivityHandler extends Handler {
 	public static final int BT_CONNECTION_ESTABLISHED = 5;
 	public static final int BT_MESSAGE_READ = 6;
 	
+	public static final int UPDATE_GROUP = 7;
+	
 	public static final int SOCKET_ESTABLISHED = 11;
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
-	private static final int LOADING_DIALOG_ADDTEXT = 0;
 	
 	static Chat chatSession = null;
 	private Activity mActivity;
@@ -62,23 +65,24 @@ public class MainActivityHandler extends Handler {
 			
 			
 			// Check if it should be broadcasted to other devices and do so.
-			ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
-			ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
-			ObjectOutputStream[] streams = {serverThread.getObjectOutStream(), 
-					clientThread.getObjectOutStream()};
-			
-			BluetoothSocket[] sockets = {serverThread.getSocket(), clientThread.getSocket()};
+//			ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
+//			ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
+//			ObjectOutputStream[] streams = {serverThread.getObjectOutStream(), 
+//					clientThread.getObjectOutStream()};
+//			
+//			BluetoothSocket[] sockets = {serverThread.getSocket(), clientThread.getSocket()};
 			//broadcast to other BT devices
-			Log.d(TAG, "Starting rebroadcast checks");
-			for (int i= 0; i<2; i++){
-				if (streams[i] !=null && ! sockets[i].getRemoteDevice().getAddress().equals(chatMsg.from)){
-					Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
-							sockets[i].getRemoteDevice().getAddress(),
-							chatMsg.from));
-					Chat.sendMessage(chatMsg, streams[i]);
-					return; //this return ensures were only sending data one-way
-				}
-			}
+			Chat.rebroadCastMsg(chatMsg);
+//			Log.d(TAG, "Starting rebroadcast checks");
+//			for (int i= 0; i<2; i++){
+//				if (streams[i] !=null && ! sockets[i].getRemoteDevice().getAddress().equals(chatMsg.from)){
+//					Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
+//							sockets[i].getRemoteDevice().getAddress(),
+//							chatMsg.from));
+//					Chat.sendMessage(chatMsg, streams[i]);
+//					return; //this return ensures were only sending data one-way
+//				}
+//			}
 			break;
 			
 		case DISPLAY_LOADING_DIALOG:
@@ -86,6 +90,22 @@ public class MainActivityHandler extends Handler {
 			String dialogTitle = mActivity.getString(R.string.loading_dialog_title);
 			MainActivity.loadingDialog = ProgressDialog.show(mActivity, dialogTitle, 
 					message, true);
+			break;
+			
+		case UPDATE_GROUP:
+			JSONArray group = (JSONArray) msg.obj;
+			Log.i(TAG, "group json array="+ group.toString());
+			ArrayList<String> groupList = new ArrayList<String>();
+			for (int i = 0; i<group.length(); i++){
+				try {
+					groupList.add(group.getString(i));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					mActivity,  android.R.layout.simple_list_item_1, groupList);
+			MainActivity.groupList.setAdapter(adapter);
 			break;
 			
 		case REMOVE_LOADING_DIALOG:

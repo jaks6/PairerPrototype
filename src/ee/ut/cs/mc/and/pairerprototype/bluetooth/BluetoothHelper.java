@@ -12,32 +12,36 @@ public class BluetoothHelper {
 	
 	private BluetoothAdapter adapter;
 	private Handler handler;
-	
+	public boolean listening = false;
+	public String currentServer = null;
+	private static BluetoothHelper instance = null;
 	boolean useInsecureSecureRfcomm;  //Using this to see whether user notifications disappear in
 	//insecure socket method
 	private String TAG = "BluetoothHelper";
 	
-	public BluetoothHelper(Handler handler) {
-		
-		
-		this.adapter = BluetoothAdapter.getDefaultAdapter();
-		this.handler = handler;
-		this.useInsecureSecureRfcomm = false;
-		
+	// Private constructor prevents instantiation from other classes
+    private BluetoothHelper() {
+    	this.adapter = BluetoothAdapter.getDefaultAdapter();
+    	this.useInsecureSecureRfcomm = false;
 		// Cancel discovery because it will slow down the connection
         adapter.cancelDiscovery();
-	}
-	
+    }
+    public static synchronized BluetoothHelper getInstance() {
+        if (instance == null) {
+            instance = new BluetoothHelper();
+        }
+        return instance;
+    }
 	public void startListening (){
 		Log.d(TAG , "Starting to listen for incoming BT connections");
+		listening = true;
 		AcceptThread acceptThread = new AcceptThread(adapter, handler, useInsecureSecureRfcomm);
 		acceptThread.start();
 	}
 	
 	public void connectToServer(String address){
 		BluetoothDevice server = adapter.getRemoteDevice(address);
-		// Cancel discovery because it will slow down the connection
-        adapter.cancelDiscovery();
+		currentServer = address;
         
         Log.d(TAG , "Started connecting to BT server");
 		ConnectThread connectThread = new ConnectThread(server, handler, useInsecureSecureRfcomm);
@@ -46,6 +50,10 @@ public class BluetoothHelper {
 
 	public void setInsecureRfcomm(boolean isInsecureRfcomm) {
 		this.useInsecureSecureRfcomm = isInsecureRfcomm;
+	}
+
+	public void setHandler(Handler handler) {
+		if (this.handler == null) this.handler = handler;
 	}
 
 }

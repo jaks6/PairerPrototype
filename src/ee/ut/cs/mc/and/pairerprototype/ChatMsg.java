@@ -13,24 +13,28 @@ public class ChatMsg implements Serializable{
 	String content;
 	String author;
 	String from;
+	String fromNick;
+	String authorNicK;
 	
-	public ChatMsg(String content, String from) {
+	public ChatMsg(String content, String from, String fromNick) {
 		this.content = content;
 		this.from = from;
+		this.fromNick = fromNick;
 	}
 	
 	public ChatMsg(String content) {
 		this.content = content;
+		this.fromNick = App.getUserNick();
 		this.from = BTCommon.deviceMAC;
-		this.author = BTCommon.deviceMAC;
+		this.author = App.getUserNick();
 	}
 
 	@Override
 	public String toString() {
-		if (author.equals(BTCommon.deviceMAC)){
+		if (author.equals(App.getUserNick())){
 			return "Me: "+ content;
 		}
-		return content;
+		return author +": "+content;
 	}
 
 }

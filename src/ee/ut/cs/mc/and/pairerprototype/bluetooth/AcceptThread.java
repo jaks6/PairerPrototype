@@ -40,11 +40,11 @@ class AcceptThread extends Thread {
 
 	public void run() {
 		BluetoothSocket socket = null;
-		
+
 		//Show connecting status on UI:
-    	Message msg = handler.obtainMessage(MainActivityHandler.SOCKET_LISTENING);
-        handler.sendMessage(msg);
-		
+		Message msg = handler.obtainMessage(MainActivityHandler.SOCKET_LISTENING);
+		handler.sendMessage(msg);
+
 		// Keep listening until exception occurs or a socket is returned
 		while (true) {
 			try {
@@ -70,7 +70,7 @@ class AcceptThread extends Thread {
 		Log.i("AcceptThread", "manageSocket started, notifying UI");
 		Thread messageThread = (new Thread() {
 			public void run() {
-				
+
 				Message msg_socket = handler.obtainMessage(MainActivityHandler.SOCKET_ESTABLISHED,socket);
 				handler.sendMessage(msg_socket);
 
@@ -79,8 +79,7 @@ class AcceptThread extends Thread {
 				msg_complete.arg1 = 1;
 				msg_complete.obj = "Serverside - client connection accepted";
 				handler.sendMessage(msg_complete);
-				
-				
+
 			}
 		});
 		messageThread.start();

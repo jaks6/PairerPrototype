@@ -25,8 +25,8 @@ public class SocketThread extends Thread {
     /** This thread handles incoming and outcoming bluetooth data, forwarding 
      * data in the bt network chain if needed.
      * The bluetooth network of devices uses a simple chain structure, such as:
-     *  ... -> ClientDevice -> ThisDevice -> Device -> ..., 
-     *  where ThisDevice is a client to Device and at the same time a  to ClientDevice
+     *  ... -> ClientDevice -> ThisDevice -> ServerDevice -> ..., 
+     *  where ThisDevice is a client to ServerDevice and at the same time a server to ClientDevice
      *  
      */
     public static SocketThread getInstance() {

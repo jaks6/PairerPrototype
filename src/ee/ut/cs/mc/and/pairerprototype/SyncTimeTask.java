@@ -12,9 +12,9 @@ import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
 
 public class SyncTimeTask extends AsyncTask<Void, Integer, List<Long>> {
 
-	private static final int REQUEST_INTERVAL_LENGTH = 2000;
+	private static final int REQUEST_INTERVAL_LENGTH = 1600;
 	private static final int TIMEOUT_PERIOD = 3000;
-	private static final int NO_OF_REQUESTS = 4;
+	private static final int NO_OF_REQUESTS = 5;
 	private static final String NTP_SERVER = "ntp.estpak.ee";
 
 	long timeDiff = 0;
@@ -31,8 +31,8 @@ public class SyncTimeTask extends AsyncTask<Void, Integer, List<Long>> {
 		List<Long> timeDiffs = new ArrayList<Long>();
 		Long time=(long) 0 ;
 		int i = 0;
+		SntpClient client = new SntpClient();
 		while (i <= NO_OF_REQUESTS-1) {
-			SntpClient client = new SntpClient();
 			if (client.requestTime(NTP_SERVER, TIMEOUT_PERIOD)) {
 				long now = client.getNtpTime()
 						- client.getNtpTimeReference();

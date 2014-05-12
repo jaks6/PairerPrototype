@@ -9,6 +9,11 @@
 	        android:summary="@string/pref_serverip_summ"
 	        android:defaultValue="@string/pref_serverip_default"/>
     </PreferenceCategory>
+    <EditTextPreference 
+	        android:key="pref_nickname"
+	        android:title="@string/pref_nickname"
+	        android:summary="@string/pref_nickname_summ"
+	        android:defaultValue="@string/pref_nickname_default"/>
     <CheckBoxPreference
         android:key="pref_record_once"
         android:title="@string/pref_record_once"

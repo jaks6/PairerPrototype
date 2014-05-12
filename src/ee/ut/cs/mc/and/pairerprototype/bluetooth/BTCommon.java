@@ -1,7 +1,5 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
-import java.util.UUID;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
@@ -10,7 +8,6 @@ import android.util.Log;
 public class BTCommon {
 	private static final String TAG = "BTCommon";
 	public static final String NAME = "PairerPrototype";
-	public static final UUID MY_UUID = UUID.fromString("ea738d90-52b0-11e3-8f96-0800200c9a66");
 	public static final String UUID_BASE ="7d0cea40-c618-11e3-9c1a-"; // UUID_BASE+ MAC_ADDRESS will form a valid UUID for use in bluetooth connections
 	public static String deviceMAC;
 	
@@ -59,12 +56,5 @@ public class BTCommon {
 		    	Log.d(TAG,"Fetching Bluetooth MAC address");
 		    	deviceMAC = getMACAddress();
 		    }
-		
 	}
-
-	
-	
-	
-	
-	
 }

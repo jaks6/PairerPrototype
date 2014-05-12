@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/inputField"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignRight="@+id/sendDataBtn"
         android:layout_below="@+id/btnStartBtServer"
         android:isScrollContainer="false" >
 
@@ -25,7 +25,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/chatWindow"
             android:textColor="@color/pinkred"
-            android:textSize="@dimen/MediumText" />
+            android:textSize="@dimen/ChatText" />
 
     </ScrollView>
 
@@ -102,5 +102,17 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
          />
+
+    <ListView
+        android:id="@+id/groupList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textScroll"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/textScroll"
+        android:layout_toRightOf="@+id/textScroll"
+        android:minWidth="30dp" >
+
+    </ListView>
 
 </RelativeLayout>
