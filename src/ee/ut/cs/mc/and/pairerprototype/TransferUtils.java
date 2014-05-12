@@ -9,13 +9,13 @@ import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.ClientSocketThread;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.ServerSocketThread;
 
-public class Chat {
+public class TransferUtils {
 
-	private static final String TAG = Chat.class.getName();
+	private static final String TAG = TransferUtils.class.getName();
 
 	/** Checks if a given message should be broadcasted to other devices
 	 *  and does  so where need be.*/
-	public static void rebroadCastMsg(ChatMsg message){
+	public static void rebroadCastMsg(BTMessage message){
 		ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
 		ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
 		ObjectOutputStream[] streams = getOutPutStreams();
@@ -24,35 +24,30 @@ public class Chat {
 		//broadcast to other BT devices
 		Log.d(TAG, "Starting rebroadcast checks");
 		for (int i= 0; i<2; i++){
-			if (streams[i] !=null && ! sockets[i].getRemoteDevice().getAddress().equals(message.from)){
+			if (streams[i] !=null && sockets[i] != null &&
+					!sockets[i].getRemoteDevice().getAddress().equals(message.fromMAC)){
 				Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
 						sockets[i].getRemoteDevice().getAddress(),
-						message.from));
+						message.fromMAC));
 				writeMsgToOOS(message, streams[i]);
 				return; //this return ensures were only sending data one-way
 			}
 		}
 	}
 
-	public static void sendMessage(ChatMsg message){
-
-		ObjectOutputStream[] ooses = getOutPutStreams();
-		for (ObjectOutputStream oos : ooses){
-			writeMsgToOOS(message, oos);
-		}
-	}
 
 	private static ObjectOutputStream[] getOutPutStreams() {
-		return new ObjectOutputStream[]{ClientSocketThread.getInstance().getObjectOutStream(), 
-				ServerSocketThread.getInstance().getObjectOutStream()};
+		return new ObjectOutputStream[]{
+				ServerSocketThread.getInstance().getObjectOutStream(),
+				ClientSocketThread.getInstance().getObjectOutStream()};
 	}
 
-	private static void writeMsgToOOS(ChatMsg message, ObjectOutputStream oos) {
+	private static void writeMsgToOOS(BTMessage message, ObjectOutputStream oos) {
 		if (oos==null){
 			return;
 		}
 		//Update "from" field which allows for rebroadcasting to work properly
-		message.from = BTCommon.deviceMAC;
+		message.fromMAC = BTCommon.deviceMAC;
 		try {
 			Log.i(TAG, "Started writing stream");
 			oos.writeObject(message);
@@ -61,5 +56,12 @@ public class Chat {
 			e.printStackTrace();
 		}
 		Log.v("","Finished outputstream");
+	}
+
+	public static void sendMessage(BTMessage chatMsg) {
+		ObjectOutputStream[] ooses = getOutPutStreams();
+		for (ObjectOutputStream oos : ooses){
+			writeMsgToOOS(chatMsg, oos);
+		}
 	}
 }

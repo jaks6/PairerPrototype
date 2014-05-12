@@ -44,5 +44,7 @@
     
     <string name="pref_nosync">Don\'t sync recording</string>
     <string name="pref_nosync_summ">Start audio capture immediately, instead of waiting for synced recording.</string>
-    <string name="pref_nosync_default">false</string>   
+    <string name="pref_nosync_default">false</string>
+    <string name="btn_sendfile">Send File</string>
+    <string name="btn_sendChat">Send Message</string>   
 </resources>

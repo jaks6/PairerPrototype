@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.App;
-import ee.ut.cs.mc.and.pairerprototype.ChatMsg;
+import ee.ut.cs.mc.and.pairerprototype.BTMessage;
 import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 
 public class SocketThread extends Thread {
@@ -68,7 +68,7 @@ public class SocketThread extends Thread {
 	private boolean readObjectFromInputStream(Handler handler, ObjectInputStream inStream) {
 		try {
 		    // Read from the InputStream
-			ChatMsg message = (ChatMsg) inStream.readObject();
+			BTMessage message = (BTMessage) inStream.readObject();
 		    Log.d(TAG, type +"READ OBJECT= " + message.toString());
 		    // Send the obtained bytes to the UI activity
 		    handler.obtainMessage(

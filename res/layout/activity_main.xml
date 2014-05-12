@@ -14,8 +14,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/inputField"
         android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/sendDataBtn"
         android:layout_below="@+id/btnStartBtServer"
+        android:layout_toLeftOf="@+id/btnStartBtServer"
         android:isScrollContainer="false" >
 
         <TextView
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/sendDataBtn"
-        android:layout_alignLeft="@+id/openRecorderButton"
+        android:layout_alignLeft="@+id/btnStartBtClient"
         android:layout_alignRight="@+id/textScroll"
         android:ems="10"
         android:gravity="center_vertical|center_horizontal|fill_horizontal"
@@ -42,56 +42,6 @@
 
     </EditText>
 
-    <Button
-        android:id="@+id/btnStartBtServer"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/openRecorderButton"
-        android:onClick="startBluetoothServer"
-        android:text="@string/startBtServer" />
-
-    <Button
-        android:id="@+id/btnStartBtClient"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/openRecorderButton"
-        android:onClick="startBluetoothClient"
-        android:text="@string/startBtClient" />
-
-    <Button
-        android:id="@+id/sendDataBtn"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="sendChatData"
-        android:text="@string/sendBtData" />
-
-    <Button
-        android:id="@+id/openRecorderButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/progressBar1"
-        android:layout_alignLeft="@+id/btnStartBtClient"
-        android:layout_alignRight="@+id/btnStartBtClient"
-        android:onClick="openRecorderActivity"
-        android:text="@string/openRecorderButton" />
-
-    <Button
-        android:id="@+id/btnAmplitudeCapture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/openRecorderButton"
-        android:layout_alignLeft="@+id/btnStartBtServer"
-        android:layout_alignTop="@+id/openRecorderButton"
-        android:layout_below="@+id/progressBar1"
-        android:onClick="toggleAmplitudeCapture"
-        android:text="@string/captureSequences_turnOn" />
 
     <ProgressBar
         android:id="@+id/progressBar1"
@@ -102,9 +52,40 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
          />
+    
+        <Button
+        android:id="@+id/btnAmplitudeCapture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/progressBar1"
+        android:layout_centerHorizontal="true"
+        android:onClick="toggleAmplitudeCapture"
+        android:text="@string/captureSequences_turnOn" />
+        
+    <Button
+        android:id="@+id/btnStartBtServer"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/btnAmplitudeCapture"
+        android:onClick="startBluetoothServer"
+        android:text="@string/startBtServer" />
 
-    <ListView
+    <Button
+        android:id="@+id/btnStartBtClient"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/btnAmplitudeCapture"
+        android:onClick="startBluetoothClient"
+        android:text="@string/startBtClient" />
+
+    <ee.ut.cs.mc.and.pairerprototype.GroupList
         android:id="@+id/groupList"
+        android:choiceMode="singleChoice"
+        android:background="@drawable/bg_key"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textScroll"
@@ -112,7 +93,27 @@
         android:layout_alignTop="@+id/textScroll"
         android:layout_toRightOf="@+id/textScroll"
         android:minWidth="30dp" >
+    </ee.ut.cs.mc.and.pairerprototype.GroupList>
 
-    </ListView>
+    <Button
+        android:id="@+id/btn_sendFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="sendFile"
+        android:text="@string/btn_sendfile" />
+
+    <Button
+        android:id="@+id/sendDataBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="sendChatData"
+        android:text="@string/btn_sendChat" />
+
+
 
 </RelativeLayout>

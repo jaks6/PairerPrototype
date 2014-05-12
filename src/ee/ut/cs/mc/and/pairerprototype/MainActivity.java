@@ -1,9 +1,12 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
+import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,6 +15,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -34,7 +38,8 @@ import ee.ut.cs.mc.and.simplerecorder.RecorderActivity;
 public class MainActivity extends Activity {
 
 	private static final String TAG = "MainActivity";
-    private static final int TEXT_ID = 0;
+	private static final int TEXT_ID = 0;
+	private static final int FILEUTILS_REQUEST_CHOOSER = 1234;
 	/* 
 	 * UI ELEMENTS
 	 */
@@ -42,7 +47,7 @@ public class MainActivity extends Activity {
 	static Button serverButton;
 	Button toggleCaptureButton;
 	EditText inputField;
-	public static ListView groupList;
+	public static GroupList groupList;
 	public static ProgressDialog loadingDialog;
 	AppRunningNotification runningNotification = null;
 
@@ -62,7 +67,7 @@ public class MainActivity extends Activity {
 		Log.i(TAG, "onCreate");
 
 		setContentView(R.layout.activity_main);
-		groupList = (ListView) findViewById(R.id.groupList);
+		groupList = (GroupList) findViewById(R.id.groupList);
 		clientButton = (Button) findViewById(R.id.btnStartBtClient);
 		serverButton = (Button) findViewById(R.id.btnStartBtServer);
 		toggleCaptureButton = (Button) findViewById(R.id.btnAmplitudeCapture);
@@ -73,7 +78,7 @@ public class MainActivity extends Activity {
 
 		mHandler = new MainActivityHandler(this);
 		App.setMainActivityHandler(mHandler);
-		
+
 		mNetworkmanager = NetworkManager.getInstance();
 		String nick = App.getPrefs().getString("pref_nickname", "MyNickname");
 		Log.i(TAG, "Nick = " + nick);
@@ -115,10 +120,10 @@ public class MainActivity extends Activity {
 
 		boolean scheduleOnce = App.getPrefs().getBoolean("pref_record_once", false);
 		boolean dontSync = App.getPrefs().getBoolean("pref_nosync", false);
-		
+
 		initialDelay = (dontSync)? 0: initialDelay;
 		Log.d(TAG, "initDelay= " + initialDelay);
-		
+
 		Thread doCaptureTask = AmplitudeUtils.doCaptureTask(mHandler, this);
 		if (scheduleOnce){
 			Log.d(TAG, "scheduling *ONE* recording");
@@ -131,7 +136,7 @@ public class MainActivity extends Activity {
 			ScheduledFuture<?> periodicFuture = scheduledThreadPool.scheduleAtFixedRate(doCaptureTask, initialDelay, 10000, TimeUnit.MILLISECONDS);
 		}
 	}
-	
+
 
 	public void startBluetoothClient(View view){
 		Log.i("", "Starting BT client in MainActivity");
@@ -142,10 +147,10 @@ public class MainActivity extends Activity {
 		String serverMACXperia = "D0:51:62:93:E8:CE";
 		String serverNexus5 = "CC:FA:00:16:2B:9A";
 		btClient.setInsecureRfcomm(true);
-		
+
 		//HACK FOR TESTING:
 		String server =(BTCommon.deviceMAC.equals(serverNexus5))? serverMACXperia:serverNexus5;
-		
+
 		btClient.connectToServer(server);
 	}
 
@@ -165,12 +170,26 @@ public class MainActivity extends Activity {
 
 	public void sendChatData(View view) throws Exception{
 		//Obtain the string from the textinput, reset the inputField:
-		ChatMsg chatmsg = new ChatMsg( inputField.getText().toString().trim());
-		displayInChat(chatmsg.toString());
+		//		ChatMsg chatmsg = new ChatMsg( inputField.getText().toString().trim());
+
+		String destinationNick = "*";
+		BTMessage chatMsg = new BTMessage(inputField.getText().toString().trim(), destinationNick);
+		displayInChat(chatMsg.toString());
 		inputField.setText("");
 
 		//write data to all bt sockets:
-		Chat.sendMessage(chatmsg);
+		//		TransferUtils.sendMessage(chatmsg);
+		TransferUtils.sendMessage(chatMsg);
+	}
+
+	public void sendFile(View v){
+		// Create the ACTION_GET_CONTENT Intent
+		Intent getContentIntent = FileUtils.createGetContentIntent();
+
+		Intent intent = Intent.createChooser(getContentIntent, "Select a file");
+		startActivityForResult(intent, FILEUTILS_REQUEST_CHOOSER);
+
+
 	}
 
 	public void displayInChat(CharSequence charseq){
@@ -181,38 +200,38 @@ public class MainActivity extends Activity {
 	void displayToast(CharSequence message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 	}
-	
+
 	/**
-     * Create and return an example alert dialog with an edit text box.
+	 * Create and return an example alert dialog with an edit text box.
 	 * @return 
-     */
-    private void createDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Hello User");
-        builder.setMessage("What is your name:");
-         // Use an EditText view to get user input.
-         final EditText input = new EditText(this);
-         input.setId(TEXT_ID);
-         builder.setView(input);
- 
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = input.getText().toString();
-                Editor editor = App.getPrefs().edit();
-                editor.putString("pref_nickname", value);
-                editor.commit();
-                return;
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                return;
-            }
-        });
-        builder.create().show();
-    }
+	 */
+	private void createDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Hello User");
+		builder.setMessage("What is your name:");
+		// Use an EditText view to get user input.
+		final EditText input = new EditText(this);
+		input.setId(TEXT_ID);
+		builder.setView(input);
+
+		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String value = input.getText().toString();
+				Editor editor = App.getPrefs().edit();
+				editor.putString("pref_nickname", value);
+				editor.commit();
+				return;
+			}
+		});
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				return;
+			}
+		});
+		builder.create().show();
+	}
 
 
 
@@ -230,20 +249,45 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_settings:
+		if (item.getItemId() == R.id.action_settings){
 			startActivity(new Intent(this, SettingsActivity.class));
 			return false;
-
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}
 	@Override
 	protected void onActivityResult (int requestCode, int resultCode, Intent data){
-	  if ((requestCode == BTCommon.REQUEST_ENABLE_BT) && (resultCode == Activity.RESULT_OK)){
-		BTCommon.handleBluetoothTurnedOnEvent();
-	  }
+		if ((requestCode == BTCommon.REQUEST_ENABLE_BT) && (resultCode == Activity.RESULT_OK)){
+			BTCommon.handleBluetoothTurnedOnEvent();
+		} else if (requestCode == FILEUTILS_REQUEST_CHOOSER){
+			if (resultCode == RESULT_OK) {
+				MainActivity.loadingDialog.setMessage("Sending file via bluetooth..");
+				MainActivity.loadingDialog.show();
+				transmitFile(data);
+			}
+		}
+	}
+
+	private void transmitFile(final Intent data) {
+		final Uri uri = data.getData();
+		// Get the File path from the Uri
+		final String path = FileUtils.getPath(this, uri);
+		new Thread(new Runnable(){
+			@Override
+			public void run() {
+				// Alternatively, use FileUtils.getFile(Context, Uri)
+				if (path != null && FileUtils.isLocal(path)) {
+					File file = new File(path);
+					Log.i(TAG, "FILE " + path);
+					String recipient = groupList.getRecipient();
+					TransferUtils.sendMessage(new BTMessage(file, recipient));
+
+					MainActivity.loadingDialog.dismiss();
+				}
+			}
+		}).start();
+
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -8,6 +10,8 @@ import org.json.JSONException;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -24,21 +28,21 @@ public class MainActivityHandler extends Handler {
 	public static final int REMOVE_LOADING_DIALOG = 4;
 	public static final int BT_CONNECTION_ESTABLISHED = 5;
 	public static final int BT_MESSAGE_READ = 6;
-	
+
 	public static final int UPDATE_GROUP = 7;
-	
+
 	public static final int SOCKET_ESTABLISHED = 11;
 	public static final int SOCKET_LISTENING = 12;
 	public static final int SOCKET_CONNECTING = 13;
-	
-	static Chat chatSession = null;
+
+	static TransferUtils chatSession = null;
 	private Activity mActivity;
 	private String TAG = MainActivityHandler.class.toString();
-	
+
 	public MainActivityHandler(Activity activity) {
 		this.mActivity = activity;
 	}
-	
+
 	@Override
 	public void handleMessage(Message msg) {
 		String message = "";
@@ -59,43 +63,38 @@ public class MainActivityHandler extends Handler {
 
 		case BT_MESSAGE_READ:
 			//A message has been received via bluetooth.
-			ChatMsg chatMsg = (ChatMsg) msg.obj;
-			//Display the msg in main chat window
-			((MainActivity) mActivity).displayInChat(chatMsg.toString());
-			
-			
-			// Check if it should be broadcasted to other devices and do so.
-//			ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
-//			ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
-//			ObjectOutputStream[] streams = {serverThread.getObjectOutStream(), 
-//					clientThread.getObjectOutStream()};
-//			
-//			BluetoothSocket[] sockets = {serverThread.getSocket(), clientThread.getSocket()};
-			//broadcast to other BT devices
-			Chat.rebroadCastMsg(chatMsg);
-//			Log.d(TAG, "Starting rebroadcast checks");
-//			for (int i= 0; i<2; i++){
-//				if (streams[i] !=null && ! sockets[i].getRemoteDevice().getAddress().equals(chatMsg.from)){
-//					Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
-//							sockets[i].getRemoteDevice().getAddress(),
-//							chatMsg.from));
-//					Chat.sendMessage(chatMsg, streams[i]);
-//					return; //this return ensures were only sending data one-way
-//				}
-//			}
+			BTMessage btMessage = (BTMessage) msg.obj;
+			Log.i(TAG, "Handling message from" + btMessage.fromMAC + ", to = "+ btMessage.destinationNick);
+			if (btMessage.destinationNick.equals(App.getUserNick()) ||
+					btMessage.destinationNick.equals("*")){
+				//we are the intended recipients
+				Log.i(TAG, "this message is for me");
+				if (btMessage.type == BTMessage.TYPE_CHATMESSAGE){
+					handleChatMessage(btMessage);
+				} else if (btMessage.type == BTMessage.TYPE_FILE){
+					handleFileMessage(btMessage);
+				}
+			}
+			if (btMessage.destinationNick.equals(App.getUserNick())){
+				break;
+			} else {
+				TransferUtils.rebroadCastMsg(btMessage);
+			}
+
 			break;
-			
+
 		case DISPLAY_LOADING_DIALOG:
 			message = (String) msg.obj;
 			String dialogTitle = mActivity.getString(R.string.loading_dialog_title);
 			MainActivity.loadingDialog = ProgressDialog.show(mActivity, dialogTitle, 
 					message, true);
 			break;
-			
+
 		case UPDATE_GROUP:
 			JSONArray group = (JSONArray) msg.obj;
 			Log.i(TAG, "group json array="+ group.toString());
 			ArrayList<String> groupList = new ArrayList<String>();
+			groupList.add("*Select All*");
 			for (int i = 0; i<group.length(); i++){
 				try {
 					groupList.add(group.getString(i));
@@ -107,13 +106,13 @@ public class MainActivityHandler extends Handler {
 					mActivity,  android.R.layout.simple_list_item_1, groupList);
 			MainActivity.groupList.setAdapter(adapter);
 			break;
-			
+
 		case REMOVE_LOADING_DIALOG:
 			if (MainActivity.loadingDialog != null){
 				MainActivity.loadingDialog.dismiss();
 			}
 			break;
-			
+
 		case SOCKET_ESTABLISHED:
 			MainActivity.socket = (BluetoothSocket) msg.obj;
 			break;
@@ -125,14 +124,39 @@ public class MainActivityHandler extends Handler {
 		case SOCKET_CONNECTING:
 			MainActivity.clientButton.setText("Trying to connect..");
 			break;
-		
+
 		case UPDATE_PROGRESSBAR:
 			((ProgressBar)mActivity.findViewById(R.id.progressBar1)).setProgress(msg.arg1);
 			break;
 		}
 		super.handleMessage(msg);
 	}
-	
+
+	private void handleFileMessage(BTMessage btMessage) {
+		Log.i(TAG, "Handling received file=" + btMessage.fileContent.getAbsolutePath() +"size "+ btMessage.fileContent.getTotalSpace());
+
+		File localFile = null;
+		try {
+			localFile = btMessage.getFileFromBytes();
+			Intent openIntent = new Intent(Intent.ACTION_VIEW);
+			Uri uri = Uri.fromFile(localFile);
+
+			String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+			String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+			openIntent.setDataAndType(uri,mimetype);
+			mActivity.startActivity(openIntent);
+		} catch (IOException e) {
+			((MainActivity) mActivity).displayToast((CharSequence)"problem opening file");
+		}
+	}
+
+	private void handleChatMessage(BTMessage btMessage) {
+		//Display the msg in main chat window
+		((MainActivity) mActivity).displayInChat(btMessage.toString());
+		// Check if it should be broadcasted to other devices and do so.
+		TransferUtils.rebroadCastMsg(btMessage);
+	}
+
 
 
 }
