@@ -1,6 +1,9 @@
 package ee.ut.cs.mc.and.pairerprototype;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
 
 import android.app.Application;
 import android.content.Context;
@@ -13,6 +16,9 @@ public class App extends Application {
 	static SharedPreferences prefs;
 	static Context mContext;
 	static MainActivityHandler mainActivityHandler;
+	
+	public static final boolean fakeSequence = true;
+	static String lastGroupId;
 	private String TAG = App.class.getName();
 	JSONObject lastInstructions;
 
@@ -43,6 +49,25 @@ public class App extends Application {
 
 	public static void setMainActivityHandler(MainActivityHandler handler) {
 		mainActivityHandler = handler;
+	}
+
+	public static void setGroupId(String groupId) {
+		lastGroupId = groupId;
+		
+	}
+
+	public static String getLastGroupId() {
+		return lastGroupId;
+	}
+	
+	public static JSONArray getFakeSequence(){
+		JSONArray sequenceJson = new JSONArray();
+		for (int i=0; i<AmplitudeUtils.NO_OF_SAMPLES_IN_SEQUENCE; i++){
+			//gather a sample
+			int sample = 5;
+			sequenceJson.put(sample);
+		}
+		return sequenceJson;
 	}
 
 }

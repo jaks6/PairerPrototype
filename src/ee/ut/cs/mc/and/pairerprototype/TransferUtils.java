@@ -2,11 +2,11 @@ package ee.ut.cs.mc.and.pairerprototype;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
-import ee.ut.cs.mc.and.pairerprototype.bluetooth.ClientSocketThread;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.ServerSocketThread;
 
 public class TransferUtils {
@@ -17,29 +17,35 @@ public class TransferUtils {
 	 *  and does  so where need be.*/
 	public static void rebroadCastMsg(BTMessage message){
 		ServerSocketThread serverThread = (ServerSocketThread) ServerSocketThread.getInstance();
-		ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
-		ObjectOutputStream[] streams = getOutPutStreams();
+//		ClientSocketThread clientThread = (ClientSocketThread) ClientSocketThread.getInstance();
+		ArrayList<ObjectOutputStream> streams = getOutPutStreams();
 
-		BluetoothSocket[] sockets = {serverThread.getSocket(), clientThread.getSocket()};
+		
+//		BluetoothSocket[] sockets = {serverThread.getSocket()};
+		ArrayList<BluetoothSocket> socketList = new ArrayList<BluetoothSocket>();
+		socketList.add(serverThread.getSocket());
+		socketList.addAll(BTCommon.getSockets());
+		
 		//broadcast to other BT devices
 		Log.d(TAG, "Starting rebroadcast checks");
-		for (int i= 0; i<2; i++){
-			if (streams[i] !=null && sockets[i] != null &&
-					!sockets[i].getRemoteDevice().getAddress().equals(message.fromMAC)){
+		for (int i= 0; i<streams.size(); i++){
+			if (streams.get(i) !=null && socketList.get(i) != null &&
+					!socketList.get(i).getRemoteDevice().getAddress().equals(message.fromMAC)){
 				Log.d(TAG, String.format("Rebroadcasting, SOCKETADDRESS= %s, FROM=%s",
-						sockets[i].getRemoteDevice().getAddress(),
+						socketList.get(i).getRemoteDevice().getAddress(),
 						message.fromMAC));
-				writeMsgToOOS(message, streams[i]);
+				writeMsgToOOS(message, streams.get(i));
 				return; //this return ensures were only sending data one-way
 			}
 		}
 	}
 
 
-	private static ObjectOutputStream[] getOutPutStreams() {
-		return new ObjectOutputStream[]{
-				ServerSocketThread.getInstance().getObjectOutStream(),
-				ClientSocketThread.getInstance().getObjectOutStream()};
+	private static ArrayList<ObjectOutputStream> getOutPutStreams() {
+		ArrayList<ObjectOutputStream> resultArray = new ArrayList<ObjectOutputStream>();
+		resultArray.add(ServerSocketThread.getInstance().getObjectOutStream());
+		resultArray.addAll(BTCommon.getOOSes());
+		return resultArray;
 	}
 
 	private static void writeMsgToOOS(BTMessage message, ObjectOutputStream oos) {
@@ -59,7 +65,7 @@ public class TransferUtils {
 	}
 
 	public static void sendMessage(BTMessage chatMsg) {
-		ObjectOutputStream[] ooses = getOutPutStreams();
+		ArrayList<ObjectOutputStream> ooses = getOutPutStreams();
 		for (ObjectOutputStream oos : ooses){
 			writeMsgToOOS(chatMsg, oos);
 		}

@@ -77,7 +77,7 @@ public class BTMessage implements Serializable{
 			File downloadsPath = Environment.getExternalStoragePublicDirectory(
 					Environment.DIRECTORY_DOWNLOADS);
 			fileContent.getName();
-			result = new File(downloadsPath.getAbsolutePath() + fileContent.getName());
+			result = new File(downloadsPath.getAbsolutePath() + "//"+ fileContent.getName());
 			org.apache.commons.io.FileUtils.writeByteArrayToFile(
 					result, fileBytes);
 		}

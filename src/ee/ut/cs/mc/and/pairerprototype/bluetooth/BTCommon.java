@@ -1,7 +1,11 @@
 package ee.ut.cs.mc.and.pairerprototype.bluetooth;
 
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.util.Log;
 
@@ -11,6 +15,8 @@ public class BTCommon {
 	public static final String UUID_BASE ="7d0cea40-c618-11e3-9c1a-"; // UUID_BASE+ MAC_ADDRESS will form a valid UUID for use in bluetooth connections
 	public static String deviceMAC;
 	
+	
+	public static ArrayList<ClientSocketThread> clientSocketList = new ArrayList<ClientSocketThread>();
 	static BluetoothAdapter mBluetoothAdapter =  BluetoothAdapter.getDefaultAdapter();
 	public static int REQUEST_ENABLE_BT = 1;	
 	
@@ -56,5 +62,20 @@ public class BTCommon {
 		    	Log.d(TAG,"Fetching Bluetooth MAC address");
 		    	deviceMAC = getMACAddress();
 		    }
+	}
+	
+	public static ArrayList<BluetoothSocket> getSockets(){
+		ArrayList<BluetoothSocket> resultList = new ArrayList<BluetoothSocket>();
+		for (ClientSocketThread thread: clientSocketList){
+			resultList.add(thread.getSocket());
+		}
+		return resultList;
+	}
+	public static ArrayList<ObjectOutputStream> getOOSes(){
+		ArrayList<ObjectOutputStream> resultList = new ArrayList<ObjectOutputStream>();
+		for (ClientSocketThread thread: clientSocketList){
+			resultList.add(thread.getObjectOutStream());
+		}
+		return resultList;
 	}
 }

@@ -83,8 +83,14 @@ class AcceptThread extends Thread {
 			}
 		});
 		messageThread.start();
-		ClientSocketThread.getInstance().setSocket(socket);
-		ClientSocketThread.getInstance().start();
+		
+		ClientSocketThread clientThread = new ClientSocketThread();
+		clientThread.setSocket(socket);
+		clientThread.start();
+		BTCommon.clientSocketList.add(clientThread);
+		
+//		ClientSocketThread.getInstance().setSocket(socket);
+//		ClientSocketThread.getInstance().start();
 	}
 
 	/** Will cancel the listening socket, and cause the thread to finish */

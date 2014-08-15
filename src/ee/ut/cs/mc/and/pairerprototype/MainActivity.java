@@ -6,8 +6,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.ipaulpro.afilechooser.utils.FileUtils;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -17,16 +15,17 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.ipaulpro.afilechooser.utils.FileUtils;
+
 import ee.ut.cs.mc.and.pairerprototype.amplitudelogger.AmplitudeUtils;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BTCommon;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BluetoothHelper;
@@ -143,15 +142,17 @@ public class MainActivity extends Activity {
 
 		BluetoothHelper btClient = BluetoothHelper.getInstance();
 		btClient.setHandler(mHandler);
-		String serverMACSII = "0C:DF:A4:71:6D:06";
+		String client1 = "CC:FA:00:16:2E:A4";
+		String client3 = "CC:FA:00:16:1E:6C";
+		String client4 = "CC:FA:00:16:2E:8A";
 		String serverMACXperia = "D0:51:62:93:E8:CE";
 		String serverNexus5 = "CC:FA:00:16:2B:9A";
 		btClient.setInsecureRfcomm(true);
 
 		//HACK FOR TESTING:
-		String server =(BTCommon.deviceMAC.equals(serverNexus5))? serverMACXperia:serverNexus5;
+//		String server =(BTCommon.deviceMAC.equals(serverNexus5))? serverMACXperia:serverNexus5;
 
-		btClient.connectToServer(server);
+		btClient.connectToServer(serverNexus5);
 	}
 
 	public void startBluetoothServer(View view){
@@ -160,7 +161,9 @@ public class MainActivity extends Activity {
 		BluetoothHelper btServer = BluetoothHelper.getInstance();
 		btServer.setHandler(mHandler);
 		btServer.setInsecureRfcomm(true);
-		btServer.startListening();
+		for (int i = 0; i<3; i++){
+			btServer.startListening();
+		}
 	}
 
 	public void openSettingsActivity(View view){
@@ -304,9 +307,12 @@ public class MainActivity extends Activity {
 
 		Log.i(TAG, "onDestroy");
 		ServerSocketThread.getInstance().cancel();
-		ClientSocketThread.getInstance().cancel();
+		for(ClientSocketThread thread: BTCommon.clientSocketList){
+			thread.cancel();
+		}
 		if (scheduledThreadPool != null) scheduledThreadPool.shutdownNow();
 		runningNotification.remove();
+		System.exit(0);
 
 	}
 	@Override

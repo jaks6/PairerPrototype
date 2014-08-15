@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import ee.ut.cs.mc.and.pairerprototype.App;
 import ee.ut.cs.mc.and.pairerprototype.MainActivityHandler;
 import ee.ut.cs.mc.and.pairerprototype.bluetooth.BluetoothHelper;
 
@@ -32,12 +33,13 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 		URLConnection connection = null;
 		try {
 			connection = networkManager.initURLConnection("json");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		Log.d("attempting to post json to sever=", params[0].toString());
+			params[0].put("lastgroup", App.getLastGroupId());
+			if (App.fakeSequence){
+				params[0].put("sequence", App.getFakeSequence());
+			}
 
-		try {
+			Log.d("attempting to post json to server=", params[0].toString());
+
 			OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 			out.write(params[0].toString());
 			out.close();
@@ -63,6 +65,8 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (JSONException e1) {
+			e1.printStackTrace();
 		}
 
 		return null;
@@ -84,35 +88,43 @@ public class PostSequenceTask extends AsyncTask<JSONObject, Object, JSONObject>
 
 	private void followInstructions(JSONObject responseJSON) {
 		String connectToMac = null;
-		boolean listenForConnections = false;
+		String groupId= null;
+		JSONArray acceptFrom = null;
 		JSONArray group = null;
 		try {
+			if (responseJSON.has("groupid")) groupId = responseJSON.getString("groupid");
 			if (responseJSON.has("connectto")) connectToMac = responseJSON.getString("connectto");
 			if (responseJSON.has("group")) group = responseJSON.getJSONArray("group");
-			if (responseJSON.has("listento")) listenForConnections = responseJSON.getBoolean("listento");
+			if (responseJSON.has("acceptfrom")) acceptFrom = responseJSON.getJSONArray("acceptfrom");
 		} catch (JSONException e1) { e1.printStackTrace();}
 		BluetoothHelper communicator = BluetoothHelper.getInstance();
 		communicator.setHandler(handler);
 		communicator.setInsecureRfcomm(true);
-		
-		if (connectToMac!=null && !connectToMac.equals(communicator.currentServer)){
+
+		App.setGroupId(groupId);
+
+		if (connectToMac!= null && !connectToMac.equals(communicator.currentServer)){
 			communicator.connectToServer(connectToMac);
 		}
-		if (listenForConnections && communicator.listening != true) communicator.startListening();
 		
+		if (acceptFrom!=null && communicator.listening != true){
+			for (int i = 0; i<acceptFrom.length(); i++)
+				communicator.startListening();
+		}
+
 		if (group != null) showGroupOnUI(group);
-		
+
 	}
 
 	private void showGroupOnUI(JSONArray group) {
 		if (group != null){
-		
-		Message msg = new Message();
-		msg.what = MainActivityHandler.UPDATE_GROUP;
-		msg.obj = group;
-		handler.dispatchMessage(msg);
+
+			Message msg = new Message();
+			msg.what = MainActivityHandler.UPDATE_GROUP;
+			msg.obj = group;
+			handler.dispatchMessage(msg);
 		}
-		
+
 	}
 
 }
